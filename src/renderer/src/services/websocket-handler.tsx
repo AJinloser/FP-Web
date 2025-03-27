@@ -242,6 +242,20 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       case 'backend-synth-complete':
         setBackendSynthComplete(true);
         break;
+      case 'model-list':
+        if (message.models) {
+          // 处理模型列表
+          const processedModels = message.models.map((model: any) => ({
+            name: model.name,
+            url: model.url.startsWith("http") ? model.url : baseUrl + model.url,
+            kScale: model.kScale || 1,
+            initialXshift: model.initialXshift || 0,
+            initialYshift: model.initialYshift || 0
+          }));
+          // 通过事件发送模型列表
+          window.dispatchEvent(new CustomEvent('model-list-update', { detail: processedModels }));
+        }
+        break;
       case 'conversation-chain-end':
         if (!audioTaskQueue.hasTask()) {
           setAiState((currentState: AiState) => {

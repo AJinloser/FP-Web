@@ -76,4 +76,44 @@ export const canvasStyles = {
       },
     },
   },
+  modelSelector: {
+    container: {
+      position: 'absolute',
+      top: '20px',
+      right: '20px',
+      zIndex: 2,
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+    },
+    button: {
+      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      color: 'white',
+      padding: '8px 16px',
+      borderRadius: '20px',
+      fontSize: '14px',
+      fontWeight: 'medium',
+      transition: 'all 0.2s',
+      cursor: 'pointer',
+      userSelect: 'none',
+      _hover: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      },
+    },
+    menu: {
+      container: {
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        padding: '4px 0',
+      },
+      item: {
+        padding: '8px 16px',
+        cursor: 'pointer',
+        _hover: {
+          backgroundColor: 'gray.100',
+        },
+      },
+    },
+  },
 };
