@@ -43,6 +43,7 @@ export function ChatBubble({ message, isSelected, onClick }: ChatBubbleProps): J
           >
             {message.content}
           </Text>
+          {/* <Markdown content={message.content} /> */}
           <Text fontSize="xs" color="gray.400" mt={1}>
             {new Date(message.timestamp).toLocaleTimeString()}
           </Text>

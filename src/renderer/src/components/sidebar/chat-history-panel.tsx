@@ -15,6 +15,7 @@ import { useChatHistory } from '@/context/chat-history-context';
 import { Global } from '@emotion/react';
 import { useConfig } from '@/context/character-config-context';
 import { useWebSocket } from '@/context/websocket-context';
+import { Markdown } from '@/components/sidebar/markdown';
 
 // Type definitions
 interface MessageListProps {
@@ -101,8 +102,9 @@ function ChatHistoryPanel(): JSX.Element {
                 <ChatMessage
                   key={msg.id}
                   model={{
-                    message: msg.content,
-                    sentTime: msg.timestamp,
+                    // message: msg.content,
+                    // sentTime: msg.timestamp,
+                    type: "custom",
                     sender: msg.role === 'ai'
                       ? (msg.name || confName || 'AI')
                       : userName,
@@ -129,12 +131,35 @@ function ChatHistoryPanel(): JSX.Element {
                       userName[0].toUpperCase()
                     )}
                   </ChatAvatar>
+                  <ChatMessage.CustomContent>
+                    <div className={`ml-2 py-3 px-4 bg-gray-100 rounded-tr-2xl rounded-b-2xl`}>
+                      <Markdown content={msg.content} />
+                    </div>
+                  </ChatMessage.CustomContent>
                 </ChatMessage>
               ))
             )}
           </ChatMessageList>
         </ChatContainer>
       </MainContainer>
+      {/* {validMessages.length === 0 ? (
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          height="100%"
+          color="whiteAlpha.500"
+          fontSize="sm"
+        >
+          No messages yet. Start a conversation!
+        </Box>
+      ) : (
+        validMessages.map((msg) => (
+          <div className={`ml-2 py-3 px-4 bg-gray-100 rounded-tr-2xl rounded-b-2xl`}>
+            <Markdown content={msg.content} />
+          </div>
+        ))
+      )} */}
     </Box>
   );
 }
