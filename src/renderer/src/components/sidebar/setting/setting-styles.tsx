@@ -75,6 +75,8 @@ export const settingStyles = {
       height: isElectron ? 'calc(100vh - 30px)' : '100vh',
       borderLeft: '1px solid',
       borderColor: 'whiteAlpha.200',
+      position: 'fixed',
+      zIndex: 1000,
     },
     drawerHeader: {
       display: 'flex',

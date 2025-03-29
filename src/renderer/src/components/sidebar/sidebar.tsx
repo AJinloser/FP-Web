@@ -41,7 +41,7 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: {
 
 ToggleButton.displayName = 'ToggleButton';
 
-const HeaderButtons = memo(({ onSettingsOpen, onNewHistory }: HeaderButtonsProps) => (
+export const HeaderButtons = memo(({ onSettingsOpen, onNewHistory }: HeaderButtonsProps) => (
   <Box display="flex" gap={1}>
     <Button onClick={onSettingsOpen}>
       <FiSettings />

@@ -12,7 +12,7 @@ function Canvas(): JSX.Element {
       <Box {...canvasStyles.canvas.container}>
         <Live2D isPet={false} />
         <WebSocketStatus />
-        <ModelSelector />
+        {/* <ModelSelector /> */}
         <Subtitle />
       </Box>
     </Background>

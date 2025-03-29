@@ -8,6 +8,12 @@ import { toaster } from '@/components/ui/toaster';
 import { useWebSocket } from '@/context/websocket-context';
 import { DisplayText } from '@/services/websocket-service';
 
+declare global {
+  interface Window {
+    webkitAudioContext: typeof AudioContext;
+  }
+}
+
 interface AudioTaskOptions {
   audioBase64: string
   volumes: number[]
@@ -73,45 +79,68 @@ export const useAudioTask = () => {
       }
     }
 
-    if (!model) {
-      console.error('Model not initialized');
-      resolve();
-      return;
-    }
-
     try {
-      if (expressions?.[0] !== undefined) {
-        model.expression(expressions[0]);
-      }
-
-      let isFinished = false;
-      if (audioBase64) {
-        model.speak(`data:audio/wav;base64,${audioBase64}`, {
-          onFinish: () => {
-            console.log("Voiceline is over");
-            isFinished = true;
-            resolve();
-          },
-          onError: (error) => {
-            console.error("Audio playback error:", error);
-            isFinished = true;
-            resolve();
-          },
-        });
-      } else {
-        resolve();
-      }
-
-      const checkFinished = () => {
-        if (!isFinished) {
-          setTimeout(checkFinished, 100);
+      if (model) {
+        if (expressions?.[0] !== undefined) {
+          model.expression(expressions[0]);
         }
-      };
-      checkFinished();
+
+        let isFinished = false;
+        if (audioBase64) {
+          model.speak(`data:audio/wav;base64,${audioBase64}`, {
+            onFinish: () => {
+              console.log("Voiceline is over");
+              isFinished = true;
+              resolve();
+            },
+            onError: (error) => {
+              console.error("Audio playback error:", error);
+              isFinished = true;
+              resolve();
+            },
+          });
+
+          const checkFinished = () => {
+            if (!isFinished) {
+              setTimeout(checkFinished, 100);
+            }
+          };
+          checkFinished();
+        } else {
+          resolve();
+        }
+      } else {
+        // 如果没有Live2D模型，使用Web Audio API播放音频
+        if (audioBase64) {
+          const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+          const audioData = atob(audioBase64);
+          const arrayBuffer = new ArrayBuffer(audioData.length);
+          const view = new Uint8Array(arrayBuffer);
+          for (let i = 0; i < audioData.length; i++) {
+            view[i] = audioData.charCodeAt(i);
+          }
+          
+          audioContext.decodeAudioData(arrayBuffer, (buffer) => {
+            const source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.start(0);
+            source.onended = () => {
+              console.log("Voiceline is over");
+              resolve();
+            };
+          }, (error) => {
+            console.error("Audio decoding error:", error);
+            resolve();
+          });
+        } else {
+          resolve();
+        }
+      }
     } catch (error) {
-      console.error('Speak function error:', error);
+      console.error('Audio playback error:', error);
       toaster.create({
-        title: `Speak function error: ${error}`,
+        title: `Audio playback error: ${error}`,
         type: "error",
         duration: 2000,
       });
