@@ -273,6 +273,24 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
         // Handle forwarded interrupt
         interrupt(false); // do not send interrupt signal to server
         break;
+      case 'tts-settings':
+        if (message.tts_settings) {
+          // 处理TTS设置
+          window.dispatchEvent(new CustomEvent('tts-settings-update', { 
+            detail: message.tts_settings 
+          }));
+        }
+        break;
+      case 'available-tts-models':
+        if (message.available_tts_models) {
+          window.dispatchEvent(new CustomEvent('tts-models-update', { 
+            detail: {
+              available_tts_models: message.available_tts_models,
+              current_tts_model: message.current_tts_model
+            }
+          }));
+        }
+        break;
       default:
         console.warn('Unknown message type:', message.type);
     }

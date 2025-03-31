@@ -70,6 +70,15 @@ export interface MessageEvent {
     initialXshift?: number;
     initialYshift?: number;
   }>;
+  tts_settings?: {
+    tts_model: string;
+    api_key?: string;
+    region?: string;
+    voice?: string;
+    // 其他TTS设置项
+  };
+  available_tts_models?: string[];
+  current_tts_model?: string;
 }
 
 class WebSocketService {
