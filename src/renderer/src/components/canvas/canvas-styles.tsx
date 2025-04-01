@@ -1,11 +1,13 @@
 export const canvasStyles = {
   background: {
     container: {
-      position: 'relative',
+      position: 'relative' as const,
       width: '100%',
       height: '100%',
       overflow: 'hidden',
       pointerEvents: 'auto',
+      borderRadius: 'xl',
+      bg: 'transparent',
     },
     image: {
       position: 'absolute',
@@ -42,19 +44,25 @@ export const canvasStyles = {
       bottom: '30px',
       left: '50%',
       transform: 'translateX(-50%)',
-      backgroundColor: 'rgba(0, 0, 0, 0.7)',
+      backgroundColor: 'rgba(255, 255, 255, 0.65)',
       padding: '15px 30px',
       borderRadius: '12px',
       minWidth: '60%',
       maxWidth: '95%',
       zIndex: 2,
+      backdropFilter: 'blur(12px)',
+      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.03), 0 1px 3px rgba(0, 0, 0, 0.05)',
+      border: '1px solid',
+      borderColor: 'rgba(255, 255, 255, 0.3)',
     },
     text: {
-      color: 'white',
+      color: 'gray.800',
       fontSize: '1.5rem',
       textAlign: 'center',
       lineHeight: '1.4',
       whiteSpace: 'pre-wrap',
+      fontWeight: 'medium',
+      textShadow: '0 1px 2px rgba(0, 0, 0, 0.03)',
     },
   },
   wsStatus: {

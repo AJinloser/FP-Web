@@ -100,7 +100,6 @@ function SettingUI({ open, onClose }: SettingUIProps): JSX.Element {
       onOpenChange={(e) => (e.open ? null : onClose())}
       placement="start"
     >
-      <DrawerBackdrop />
       <DrawerContent {...settingStyles.settingUI.drawerContent}>
         <DrawerHeader {...settingStyles.settingUI.drawerHeader}>
           <DrawerTitle {...settingStyles.settingUI.drawerTitle}>
@@ -108,7 +107,7 @@ function SettingUI({ open, onClose }: SettingUIProps): JSX.Element {
           </DrawerTitle>
           <div {...settingStyles.settingUI.closeButton}>
             <DrawerCloseTrigger asChild onClick={handleCancel}>
-              <CloseButton size="sm" color="white" />
+              <CloseButton size="sm" color="gray.600" />
             </DrawerCloseTrigger>
           </div>
         </DrawerHeader>
@@ -164,10 +163,19 @@ function SettingUI({ open, onClose }: SettingUIProps): JSX.Element {
         </DrawerBody>
 
         <DrawerFooter>
-          <Button colorPalette="red" onClick={handleCancel}>
+          <Button 
+            variant="outline" 
+            colorScheme="gray" 
+            onClick={handleCancel}
+            {...settingStyles.settingUI.footerButton}
+          >
             Cancel
           </Button>
-          <Button colorPalette="blue" onClick={handleSave}>
+          <Button 
+            colorScheme="blue" 
+            onClick={handleSave}
+            {...settingStyles.settingUI.footerButton}
+          >
             Save
           </Button>
         </DrawerFooter>

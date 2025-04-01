@@ -8,16 +8,17 @@ export const settingStyles = {
       gap: 4,
       position: 'relative',
       overflowY: 'auto',
+      bg: 'white',
       css: {
         '&::-webkit-scrollbar': {
           width: '4px',
         },
         '&::-webkit-scrollbar-track': {
-          bg: 'whiteAlpha.100',
+          bg: 'gray.100',
           borderRadius: 'full',
         },
         '&::-webkit-scrollbar-thumb': {
-          bg: 'whiteAlpha.300',
+          bg: 'gray.300',
           borderRadius: 'full',
         },
       },
@@ -41,12 +42,14 @@ export const settingStyles = {
       },
       content: {},
       trigger: {
-        color: 'whiteAlpha.600',
+        color: 'gray.500',
         _selected: {
-          color: 'white',
+          color: 'gray.800',
+          borderBottom: '2px solid',
+          borderColor: 'blue.500',
         },
         _hover: {
-          color: 'white',
+          color: 'gray.800',
         },
       },
       list: {
@@ -54,7 +57,7 @@ export const settingStyles = {
         justifyContent: 'flex-start',
         width: '100%',
         borderBottom: '1px solid',
-        borderColor: 'whiteAlpha.200',
+        borderColor: 'gray.200',
         mb: 4,
         pl: 0,
       },
@@ -67,16 +70,17 @@ export const settingStyles = {
       mt: 'auto',
       pt: 4,
       borderTop: '1px solid',
-      borderColor: 'whiteAlpha.200',
+      borderColor: 'gray.200',
     },
     drawerContent: {
-      bg: 'gray.900',
+      bg: 'white',
       maxWidth: '440px',
       height: isElectron ? 'calc(100vh - 30px)' : '100vh',
       borderLeft: '1px solid',
-      borderColor: 'whiteAlpha.200',
+      borderColor: 'gray.200',
       position: 'fixed',
       zIndex: 1000,
+      boxShadow: '-4px 0 12px rgba(0, 0, 0, 0.05)',
     },
     drawerHeader: {
       display: 'flex',
@@ -88,7 +92,7 @@ export const settingStyles = {
       py: 4,
     },
     drawerTitle: {
-      color: 'white',
+      color: 'gray.800',
       fontSize: 'lg',
       fontWeight: 'semibold',
     },
@@ -96,8 +100,17 @@ export const settingStyles = {
       position: 'absolute',
       right: 1,
       top: 1,
-      color: 'white',
-
+      color: 'gray.600',
+      _hover: {
+        color: 'gray.800',
+      },
+    },
+    footerButton: {
+      minW: '100px',
+      _hover: {
+        transform: 'translateY(-1px)',
+        boxShadow: 'sm',
+      },
     },
   },
   general: {
@@ -105,23 +118,31 @@ export const settingStyles = {
       align: 'stretch',
       gap: 6,
       p: 4,
+      bg: 'white',
     },
     field: {
       label: {
-        color: 'whiteAlpha.800',
+        color: 'gray.700',
       },
     },
     select: {
       root: {
         colorPalette: 'gray',
-        bg: 'gray.800',
+        bg: 'gray.50',
       },
       trigger: {
-        bg: 'gray.800',
+        bg: 'gray.50',
+        borderColor: 'gray.200',
+        color: 'gray.800',
+        _hover: {
+          bg: 'gray.100',
+        },
       },
     },
     input: {
-      bg: 'gray.800',
+      bg: 'gray.50',
+      borderColor: 'gray.200',
+      color: 'gray.800',
     },
     buttonGroup: {
       gap: 4,
@@ -130,10 +151,11 @@ export const settingStyles = {
     button: {
       width: '50%',
       variant: 'outline' as const,
-      bg: 'blue',
-      color: 'white',
+      bg: 'transparent',
+      color: 'gray.800',
+      borderColor: 'gray.200',
       _hover: {
-        bg: 'whiteAlpha.300',
+        bg: 'gray.50',
       },
     },
     fieldLabel: {
@@ -147,8 +169,7 @@ export const settingStyles = {
     },
     fieldLabel: {
       fontSize: 'sm',
-      color: 'whiteAlpha.800',
-      whiteSpace: 'nowrap' as const,
+      color: 'gray.700',
     },
     switch: {
       size: 'md' as const,
@@ -161,10 +182,14 @@ export const settingStyles = {
         inputMode: 'decimal' as const,
       },
       input: {
-        bg: 'whiteAlpha.100',
-        borderColor: 'whiteAlpha.200',
+        bg: 'gray.50',
+        borderColor: 'gray.200',
         _hover: {
-          bg: 'whiteAlpha.200',
+          borderColor: 'gray.300',
+        },
+        _focus: {
+          borderColor: 'blue.500',
+          boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)',
         },
       },
     },
@@ -174,10 +199,14 @@ export const settingStyles = {
       css: { '--field-label-width': '120px' },
     },
     input: {
-      bg: 'whiteAlpha.100',
-      borderColor: 'whiteAlpha.200',
+      bg: 'gray.50',
+      borderColor: 'gray.200',
       _hover: {
-        bg: 'whiteAlpha.200',
+        borderColor: 'gray.300',
+      },
+      _focus: {
+        borderColor: 'blue.500',
+        boxShadow: '0 0 0 1px var(--chakra-colors-blue-500)',
       },
     },
   },

@@ -120,15 +120,49 @@ function ChatHistoryPanel(): JSX.Element {
                         <img
                           src={`${baseUrl}/avatars/${msg.avatar}`}
                           alt="avatar"
-                          style={{ width: '100%', height: '100%', borderRadius: '50%' }}
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
                         />
                       ) : (
-                        (msg.name && msg.name[0].toUpperCase()) ||
-                        (confName && confName[0].toUpperCase()) ||
-                        'A'
+                        <Box
+                          w="100%"
+                          h="100%"
+                          display="flex"
+                          alignItems="center"
+                          justifyContent="center"
+                          bg="blue.50"
+                          color="blue.600"
+                          borderRadius="50%"
+                          fontSize="lg"
+                          fontWeight="bold"
+                        >
+                          {(msg.name && msg.name[0].toUpperCase()) ||
+                            (confName && confName[0].toUpperCase()) ||
+                            'A'}
+                        </Box>
                       )
                     ) : (
-                      userName[0].toUpperCase()
+                      <Box
+                        w="100%"
+                        h="100%"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        bg="green.50"
+                        color="green.600"
+                        borderRadius="50%"
+                        fontSize="lg"
+                        fontWeight="bold"
+                      >
+                        {userName[0].toUpperCase()}
+                      </Box>
                     )}
                   </ChatAvatar>
                   <ChatMessage.CustomContent>

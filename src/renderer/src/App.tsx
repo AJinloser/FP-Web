@@ -143,6 +143,12 @@ function AppContent({
 
   const isProcessing = aiState === 'thinking-speaking' || aiState === 'listening' || isLoading;
 
+  const toggleMode = () => {
+    setViewMode(viewMode === 'live2d' ? 'chat' : 'live2d');
+  };
+
+  const isChatMode = viewMode === 'chat';
+
   return (
     <>
       <Toaster />
@@ -151,15 +157,29 @@ function AppContent({
           {isElectron && <TitleBar />}
           <Flex {...layoutStyles.appContainer}>
             <Button
-              position="absolute"
-              top="4"
-              right="4"
-              zIndex="1000"
-              onClick={() => setViewMode(viewMode === 'live2d' ? 'chat' : 'live2d')}
-              disabled={isProcessing}
-              title={isProcessing ? "正在处理中，请稍后再切换模式" : "切换模式"}
+              variant="outline"
+              colorScheme="gray"
+              size="sm"
+              onClick={toggleMode}
+              position="fixed"
+              top={4}
+              right={4}
+              zIndex={1000}
+              transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+              _hover={{
+                transform: 'translateY(-2px)',
+                boxShadow: 'md',
+                bg: 'gray.50',
+              }}
+              borderRadius="xl"
+              borderWidth="1.5px"
+              borderColor="gray.200"
+              _active={{
+                transform: 'translateY(0)',
+                boxShadow: 'sm',
+              }}
             >
-              {viewMode === 'live2d' ? '切换到聊天' : '切换到Live2D'}
+              {isChatMode ? '切换到 Live2D 模式' : '切换到聊天模式'}
             </Button>
             {viewMode === 'live2d' ? (
               <>

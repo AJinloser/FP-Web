@@ -43,23 +43,23 @@ ToggleButton.displayName = 'ToggleButton';
 
 export const HeaderButtons = memo(({ onSettingsOpen, onNewHistory }: HeaderButtonsProps) => (
   <Box display="flex" gap={1}>
-    <Button onClick={onSettingsOpen}>
+    <Button {...sidebarStyles.sidebar.headerButton} onClick={onSettingsOpen}>
       <FiSettings />
     </Button>
 
     <GroupDrawer>
-      <Button>
+      <Button {...sidebarStyles.sidebar.headerButton}>
         <FiUsers />
       </Button>
     </GroupDrawer>
 
     <HistoryDrawer>
-      <Button>
+      <Button {...sidebarStyles.sidebar.headerButton}>
         <FiClock />
       </Button>
     </HistoryDrawer>
 
-    <Button onClick={onNewHistory}>
+    <Button {...sidebarStyles.sidebar.headerButton} onClick={onNewHistory}>
       <FiPlus />
     </Button>
   </Box>
