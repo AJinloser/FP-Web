@@ -1,7 +1,7 @@
 /* eslint-disable react/require-default-props */
 import { Box, Button } from '@chakra-ui/react';
 import {
-  FiSettings, FiClock, FiPlus, FiChevronLeft, FiUsers,
+  FiSettings, FiClock, FiPlus, FiChevronLeft, FiUsers, FiHome,
 } from 'react-icons/fi';
 import { memo } from 'react';
 import { sidebarStyles } from './sidebar-styles';
@@ -11,6 +11,7 @@ import BottomTab from './bottom-tab';
 import HistoryDrawer from './history-drawer';
 import { useSidebar } from '@/hooks/sidebar/use-sidebar';
 import GroupDrawer from './group-drawer';
+import { wsService } from '@/services/websocket-service';
 
 // Type definitions
 interface SidebarProps {
@@ -21,6 +22,7 @@ interface SidebarProps {
 interface HeaderButtonsProps {
   onSettingsOpen: () => void
   onNewHistory: () => void
+  onReturnHome?: () => void
 }
 
 // Reusable components
@@ -41,7 +43,7 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: {
 
 ToggleButton.displayName = 'ToggleButton';
 
-export const HeaderButtons = memo(({ onSettingsOpen, onNewHistory }: HeaderButtonsProps) => (
+export const HeaderButtons = memo(({ onSettingsOpen, onNewHistory, onReturnHome }: HeaderButtonsProps) => (
   <Box display="flex" gap={1}>
     <Button {...sidebarStyles.sidebar.headerButton} onClick={onSettingsOpen}>
       <FiSettings />
@@ -62,17 +64,26 @@ export const HeaderButtons = memo(({ onSettingsOpen, onNewHistory }: HeaderButto
     <Button {...sidebarStyles.sidebar.headerButton} onClick={onNewHistory}>
       <FiPlus />
     </Button>
+
+    <Button 
+      {...sidebarStyles.sidebar.headerButton} 
+      onClick={onReturnHome}
+      title="返回首页"
+    >
+      <FiHome />
+    </Button>
   </Box>
 ));
 
 HeaderButtons.displayName = 'HeaderButtons';
 
-const SidebarContent = memo(({ onSettingsOpen, onNewHistory }: HeaderButtonsProps) => (
+const SidebarContent = memo(({ onSettingsOpen, onNewHistory, onReturnHome }: HeaderButtonsProps) => (
   <Box {...sidebarStyles.sidebar.content}>
     <Box {...sidebarStyles.sidebar.header}>
       <HeaderButtons
         onSettingsOpen={onSettingsOpen}
         onNewHistory={onNewHistory}
+        onReturnHome={onReturnHome}
       />
     </Box>
     <ChatHistoryPanel />
@@ -91,6 +102,11 @@ function Sidebar({ isCollapsed = false, onToggle }: SidebarProps): JSX.Element {
     createNewHistory,
   } = useSidebar();
 
+  const handleReturnHome = () => {
+    wsService.disconnect();
+    window.location.reload();
+  };
+
   return (
     <Box {...sidebarStyles.sidebar.container(isCollapsed)}>
       <ToggleButton isCollapsed={isCollapsed} onToggle={onToggle} />
@@ -99,6 +115,7 @@ function Sidebar({ isCollapsed = false, onToggle }: SidebarProps): JSX.Element {
         <SidebarContent
           onSettingsOpen={onSettingsOpen}
           onNewHistory={createNewHistory}
+          onReturnHome={handleReturnHome}
         />
       )}
 

@@ -163,7 +163,6 @@ function AppContent({
           {isElectron && <TitleBar />}
           <Flex {...layoutStyles.appContainer}>
             <Button
-              variant="outline"
               colorScheme="gray"
               size="sm"
               onClick={toggleMode}
@@ -172,17 +171,19 @@ function AppContent({
               right={4}
               zIndex={1000}
               transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+              bg="white"
+              color="gray.700"
               _hover={{
                 transform: 'translateY(-2px)',
                 boxShadow: 'md',
                 bg: 'gray.50',
               }}
               borderRadius="xl"
-              borderWidth="1.5px"
-              borderColor="gray.200"
+              boxShadow="sm"
               _active={{
                 transform: 'translateY(0)',
                 boxShadow: 'sm',
+                bg: 'gray.100',
               }}
             >
               {isChatMode ? '切换到 Live2D 模式' : '切换到聊天模式'}
