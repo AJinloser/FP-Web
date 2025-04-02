@@ -30,6 +30,7 @@ import { ScreenCaptureProvider } from './context/screen-capture-context';
 import { GroupProvider } from './context/group-context';
 // eslint-disable-next-line import/no-extraneous-dependencies, import/newline-after-import
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
+import { StartPage } from './components/start-page/StartPage';
 
 function App(): JSX.Element {
   const [showSidebar, setShowSidebar] = useState(true);
@@ -140,6 +141,7 @@ function AppContent({
   const { aiState } = useAiState();
   const { currentModel } = useLive2DModel();
   const { isLoading } = useLive2DConfig();
+  const [showStartPage, setShowStartPage] = useState(true);
 
   const isProcessing = aiState === 'thinking-speaking' || aiState === 'listening' || isLoading;
 
@@ -148,6 +150,10 @@ function AppContent({
   };
 
   const isChatMode = viewMode === 'chat';
+
+  if (showStartPage) {
+    return <StartPage onStart={() => setShowStartPage(false)} />;
+  }
 
   return (
     <>
