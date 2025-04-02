@@ -32,6 +32,7 @@ export interface Message {
   timestamp: string;
   name?: string;
   avatar?: string;
+  isThinking?: boolean;
 }
 
 export interface Actions {

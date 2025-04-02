@@ -455,6 +455,7 @@ export const sidebarStyles = {
   },
 };
 
+
 export const chatPanelStyles = css`
   .cs-message-list {
     background: white !important;
@@ -508,5 +509,32 @@ export const chatPanelStyles = css`
       color: var(--chakra-colors-gray-800) !important;
       background-color: var(--chakra-colors-gray-50) !important;
     }
+  }
+
+  .thinking-indicator {
+    opacity: 0.7;
+    color: var(--chakra-colors-gray-600);
+  }
+
+  .dot-animation {
+    display: inline-block;
+    position: relative;
+    width: 30px;
+    height: 20px;
+  }
+
+  .dot-animation::after {
+    content: '...';
+    position: absolute;
+    animation: dots 2s steps(4, end) infinite;
+    width: 30px;
+    text-align: left;
+  }
+
+  @keyframes dots {
+    0%, 20% { content: '.'; }
+    40% { content: '..'; }
+    60% { content: '...'; }
+    80%, 100% { content: ''; }
   }
 `;
