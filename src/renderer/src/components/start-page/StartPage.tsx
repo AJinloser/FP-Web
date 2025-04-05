@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Input,
@@ -45,15 +45,31 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
   const { appendHumanMessage } = useChatHistory();
   const { setAiState } = useAiState();
 
+  // 添加移动端检测逻辑
+  const isMobile = () => {
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const aspectRatio = viewportWidth / viewportHeight;
+    return aspectRatio < 1.2;
+  };
+
+  const [isMobileView, setIsMobileView] = useState(isMobile());
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(isMobile());
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleSend = (text: string) => {
     if (!text.trim()) return;
-    
     appendHumanMessage(text.trim());
     sendMessage({
       type: 'text-input',
       text: text.trim()
     });
-    
     setAiState('thinking-speaking');
     onStart();
   };
@@ -69,44 +85,79 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
       height="100vh" 
       width="100vw" 
       display="flex" 
-      alignItems="center" 
+      alignItems={isMobileView ? "flex-start" : "center"}
       justifyContent="center"
       bg="gray.50"
+      p={isMobileView ? "4" : "6"}
+      pt={isMobileView ? "8" : "6"}
     >
-      <VStack gap={8} width="80%" maxWidth="800px">
+      <VStack 
+        gap={isMobileView ? 4 : 6} 
+        width={isMobileView ? "100%" : "80%"} 
+        maxWidth={isMobileView ? "100%" : "800px"}
+        h={isMobileView ? "auto" : "auto"}
+      >
         <Input
-          size="lg"
+          size={isMobileView ? "lg" : "lg"}
           placeholder="输入你想说的话..."
           value={inputText}
           onChange={(e) => setInputText(e.target.value)}
           onKeyPress={handleKeyPress}
           borderRadius="full"
-          p={6}
+          p={isMobileView ? 6 : 6}
           bg="white"
           border="1px"
           borderColor="gray.200"
+          fontSize={isMobileView ? "md" : "lg"}
+          h={isMobileView ? "56px" : "auto"}
+          mb={isMobileView ? 2 : 0}
         />
         
-        <Grid templateColumns="repeat(3, 1fr)" gap={6} width="100%">
+        <Grid 
+          templateColumns={isMobileView ? "1fr" : "repeat(3, 1fr)"}
+          gap={isMobileView ? 3 : 6} 
+          width="100%"
+        >
           {topics.map((topic, index) => (
             <Box 
               key={index}
-              p={4}
+              p={isMobileView ? 4 : 4}
               bg="white"
               borderRadius="lg"
               border="1px"
               borderColor="gray.200"
+              shadow={isMobileView ? "sm" : "none"}
+              minH={isMobileView ? "140px" : "auto"}
+              display="flex"
+              flexDirection="column"
             >
-              <Text fontSize="xl" fontWeight="bold" mb={4}>
+              <Text 
+                fontSize={isMobileView ? "xl" : "xl"} 
+                fontWeight="bold" 
+                mb={isMobileView ? 3 : 4}
+                flex={isMobileView ? "0 0 auto" : "auto"}
+              >
                 {topic.title}
               </Text>
-              <VStack align="stretch" gap={2}>
+              <VStack 
+                align="stretch" 
+                gap={isMobileView ? 2 : 2}
+                flex={1}
+                justify="space-between"
+              >
                 {topic.subtopics.map((subtopic, subIndex) => (
                   <Button
                     key={subIndex}
                     variant="ghost"
                     justifyContent="flex-start"
                     onClick={() => handleSend(subtopic)}
+                    size={isMobileView ? "md" : "md"}
+                    py={isMobileView ? 3 : 3}
+                    height={isMobileView ? "auto" : "auto"}
+                    whiteSpace="normal"
+                    textAlign="left"
+                    fontSize={isMobileView ? "sm" : "md"}
+                    px={4}
                   >
                     {subtopic}
                   </Button>
