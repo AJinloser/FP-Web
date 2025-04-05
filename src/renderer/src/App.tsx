@@ -2,7 +2,7 @@
 import {
   Box, Flex, ChakraProvider, defaultSystem, Button,
 } from '@chakra-ui/react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Canvas from './components/canvas/canvas';
 import Sidebar from './components/sidebar/sidebar';
 import Footer from './components/footer/footer';
@@ -138,12 +138,20 @@ function AppContent({
   isElectron: boolean;
 }) {
   const { onSettingsOpen, onSettingsClose, createNewHistory, settingsOpen } = useSidebar();
-  const { aiState } = useAiState();
+  const { aiState, setAiState } = useAiState();
   const { currentModel } = useLive2DModel();
   const { isLoading } = useLive2DConfig();
   const [showStartPage, setShowStartPage] = useState(true);
+  const shouldResetState = useRef(false);
 
   const isProcessing = aiState === 'thinking-speaking' || aiState === 'listening' || isLoading;
+
+  useEffect(() => {
+    if (shouldResetState.current && aiState === 'idle') {
+      setAiState('thinking-speaking');
+      shouldResetState.current = false;
+    }
+  }, [aiState, setAiState]);
 
   const toggleMode = () => {
     setViewMode(viewMode === 'live2d' ? 'chat' : 'live2d');
@@ -177,7 +185,14 @@ function AppContent({
   }, []);
 
   if (showStartPage) {
-    return <StartPage onStart={() => setShowStartPage(false)} />;
+    return (
+      <StartPage 
+        onStart={(isMessageSent) => {
+          shouldResetState.current = isMessageSent;
+          setShowStartPage(false);
+        }} 
+      />
+    );
   }
 
   return (
@@ -199,9 +214,9 @@ function AppContent({
               bg="white"
               color="gray.700"
               _hover={{
-                transform: 'translateY(-2px)',
-                boxShadow: 'md',
-                bg: 'gray.50',
+                transform: isProcessing ? 'none' : 'translateY(-2px)',
+                boxShadow: isProcessing ? 'sm' : 'md',
+                bg: isProcessing ? 'gray.100' : 'gray.50',
               }}
               borderRadius="xl"
               boxShadow="sm"
@@ -210,6 +225,10 @@ function AppContent({
                 boxShadow: 'sm',
                 bg: 'gray.100',
               }}
+              disabled={isProcessing}
+              opacity={isProcessing ? 0.6 : 1}
+              cursor={isProcessing ? 'not-allowed' : 'pointer'}
+              title={isProcessing ? '正在处理中，请稍候...' : ''}
             >
               {isChatMode ? '切换到 Live2D 模式' : '切换到聊天模式'}
             </Button>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
   Input,
@@ -36,7 +36,7 @@ const topics: TopicItem[] = [
 ];
 
 interface StartPageProps {
-  onStart: () => void;
+  onStart: (isMessageSent: boolean) => void;
 }
 
 export function StartPage({ onStart }: StartPageProps): JSX.Element {
@@ -44,6 +44,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
   const { sendMessage } = useWebSocket();
   const { appendHumanMessage } = useChatHistory();
   const { setAiState } = useAiState();
+  const isMessageSent = useRef(false);
 
   // 添加移动端检测逻辑
   const isMobile = () => {
@@ -65,13 +66,16 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
 
   const handleSend = (text: string) => {
     if (!text.trim()) return;
+    
+    isMessageSent.current = true;
+    setAiState('thinking-speaking');
     appendHumanMessage(text.trim());
     sendMessage({
       type: 'text-input',
       text: text.trim()
     });
-    setAiState('thinking-speaking');
-    onStart();
+    
+    onStart(isMessageSent.current);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
