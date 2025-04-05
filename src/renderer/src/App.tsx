@@ -151,6 +151,31 @@ function AppContent({
 
   const isChatMode = viewMode === 'chat';
 
+  // 修改移动端判断逻辑，使用长宽比例
+  const isMobile = () => {
+    // 获取视口宽度和高度
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // 计算长宽比
+    const aspectRatio = viewportWidth / viewportHeight;
+    
+    // 当长宽比小于 1.2 时认为是移动端布局
+    // 这个比例可以根据实际需求调整
+    return aspectRatio < 1.2;
+  };
+
+  const [isMobileView, setIsMobileView] = useState(isMobile());
+
+  // 监听窗口大小变化
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileView(isMobile());
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (showStartPage) {
     return <StartPage onStart={() => setShowStartPage(false)} />;
   }
@@ -188,50 +213,63 @@ function AppContent({
             >
               {isChatMode ? '切换到 Live2D 模式' : '切换到聊天模式'}
             </Button>
-            {viewMode === 'live2d' ? (
-              <>
-                <Box
-                  {...layoutStyles.sidebar}
-                  {...(!showSidebar && { width: '24px' })}
-                >
-                  <Sidebar
-                    isCollapsed={!showSidebar}
-                    onToggle={() => setShowSidebar(!showSidebar)}
-                  />
-                </Box>
-                <Box {...layoutStyles.mainContent}>
-                  <Canvas />
-                  <Box
-                    {...layoutStyles.footer}
-                    {...(isFooterCollapsed && layoutStyles.collapsedFooter)}
-                  >
-                    <Footer
-                      isCollapsed={isFooterCollapsed}
-                      onToggle={() => setIsFooterCollapsed(!isFooterCollapsed)}
-                    />
-                  </Box>
-                </Box>
-              </>
-            ) : (
-              <Box {...layoutStyles.mainContent}>
-                <Box p="4">
-                  <HeaderButtons 
-                    onSettingsOpen={onSettingsOpen}
-                    onNewHistory={createNewHistory}
-                  />
-                </Box>
-                <Box flex="1" overflow="auto">
-                  <ChatHistoryPanel />
-                </Box>
-                <Box
-                  {...layoutStyles.footer}
-                  {...(isFooterCollapsed && layoutStyles.collapsedFooter)}
-                >
-                  <Footer
-                    isCollapsed={isFooterCollapsed}
-                    onToggle={() => setIsFooterCollapsed(!isFooterCollapsed)}
-                  />
-                </Box>
+
+            {isMobileView ? (
+              // 移动端布局
+              <Flex direction="column" h="100vh">
+                {viewMode === 'live2d' ? (
+                  // Live2D 模式下的三段式布局
+                  <>
+                    {/* 上部分：Live2D Canvas */}
+                    <Box {...layoutStyles.mobileLayout.live2d}>
+                      <Canvas />
+                    </Box>
+                    
+                    {/* 中部分：聊天记录 */}
+                    <Box {...layoutStyles.mobileLayout.chatPanel}>
+                      {/* 修改顶部按钮样式 */}
+                      <Box {...layoutStyles.mobileLayout.headerButtons}>
+                        <HeaderButtons 
+                          onSettingsOpen={onSettingsOpen}
+                          onNewHistory={createNewHistory}
+                        />
+                      </Box>
+                      <ChatHistoryPanel />
+                    </Box>
+                    
+                    {/* 下部分：输入框 */}
+                    <Box {...layoutStyles.mobileLayout.footer}>
+                      <Footer
+                        isCollapsed={false}
+                        onToggle={() => {}}
+                      />
+                    </Box>
+                  </>
+                ) : (
+                  // 聊天模式下的两段式布局
+                  <>
+                    {/* 上部分：聊天记录 */}
+                    <Box {...layoutStyles.mobileLayout.chatPanel}>
+                      {/* 修改顶部按钮样式 */}
+                      <Box {...layoutStyles.mobileLayout.headerButtons}>
+                        <HeaderButtons 
+                          onSettingsOpen={onSettingsOpen}
+                          onNewHistory={createNewHistory}
+                        />
+                      </Box>
+                      <ChatHistoryPanel />
+                    </Box>
+                    
+                    {/* 下部分：输入框 */}
+                    <Box {...layoutStyles.mobileLayout.footer}>
+                      <Footer
+                        isCollapsed={false}
+                        onToggle={() => {}}
+                      />
+                    </Box>
+                  </>
+                )}
+                {/* 设置面板 */}
                 {settingsOpen && (
                   <SettingUI
                     open={settingsOpen}
@@ -239,7 +277,64 @@ function AppContent({
                     onToggle={() => {}}
                   />
                 )}
-              </Box>
+              </Flex>
+            ) : (
+              // 桌面端布局保持不变
+              <>
+                {viewMode === 'live2d' ? (
+                  <>
+                    <Box
+                      {...layoutStyles.sidebar}
+                      {...(!showSidebar && { width: '24px' })}
+                    >
+                      <Sidebar
+                        isCollapsed={!showSidebar}
+                        onToggle={() => setShowSidebar(!showSidebar)}
+                      />
+                    </Box>
+                    <Box {...layoutStyles.mainContent}>
+                      <Canvas />
+                      <Box
+                        {...layoutStyles.footer}
+                        {...(isFooterCollapsed && layoutStyles.collapsedFooter)}
+                      >
+                        <Footer
+                          isCollapsed={isFooterCollapsed}
+                          onToggle={() => setIsFooterCollapsed(!isFooterCollapsed)}
+                        />
+                      </Box>
+                    </Box>
+                  </>
+                ) : (
+                  <Box {...layoutStyles.mainContent}>
+                    <Box p="4">
+                      <HeaderButtons 
+                        onSettingsOpen={onSettingsOpen}
+                        onNewHistory={createNewHistory}
+                      />
+                    </Box>
+                    <Box flex="1" overflow="auto">
+                      <ChatHistoryPanel />
+                    </Box>
+                    <Box
+                      {...layoutStyles.footer}
+                      {...(isFooterCollapsed && layoutStyles.collapsedFooter)}
+                    >
+                      <Footer
+                        isCollapsed={isFooterCollapsed}
+                        onToggle={() => setIsFooterCollapsed(!isFooterCollapsed)}
+                      />
+                    </Box>
+                    {settingsOpen && (
+                      <SettingUI
+                        open={settingsOpen}
+                        onClose={onSettingsClose}
+                        onToggle={() => {}}
+                      />
+                    )}
+                  </Box>
+                )}
+              </>
             )}
           </Flex>
         </>
