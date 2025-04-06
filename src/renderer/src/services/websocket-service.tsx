@@ -80,6 +80,7 @@ export interface MessageEvent {
   };
   available_tts_models?: string[];
   current_tts_model?: string;
+  should_process?: boolean;
 }
 
 class WebSocketService {

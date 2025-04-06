@@ -213,7 +213,16 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
       case 'user-input-transcription':
         console.log('user-input-transcription: ', message.text);
         if (message.text) {
-          appendHumanMessage(message.text);
+          window.dispatchEvent(new CustomEvent('websocket-message', {
+            detail: {
+              type: 'user-input-transcription',
+              text: message.text
+            }
+          }));
+          
+          if (message.should_process === false) {
+            setAiState('idle');
+          }
         }
         break;
       case 'error':

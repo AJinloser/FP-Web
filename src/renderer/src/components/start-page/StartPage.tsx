@@ -6,10 +6,15 @@ import {
   Grid,
   Text,
   Button,
+  HStack,
+  IconButton,
 } from '@chakra-ui/react';
 import { useWebSocket } from '@/context/websocket-context';
 import { useChatHistory } from '@/context/chat-history-context';
 import { useAiState } from '@/context/ai-state-context';
+import { useVAD } from '@/context/vad-context';
+import { useMicToggle } from '@/hooks/utils/use-mic-toggle';
+import { BsMicFill, BsMicMuteFill, BsSend } from 'react-icons/bs';
 
 interface TopicItem {
   title: string;
@@ -45,6 +50,8 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
   const { appendHumanMessage } = useChatHistory();
   const { setAiState } = useAiState();
   const isMessageSent = useRef(false);
+  const { handleMicToggle, micOn } = useMicToggle();
+  const { autoStopMic } = useVAD();
 
   // 添加移动端检测逻辑
   const isMobile = () => {
@@ -64,6 +71,25 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // 修改 websocket 消息处理
+  useEffect(() => {
+    const handleMessage = (event: CustomEvent) => {
+      const message = event.detail;
+      if (message.type === 'user-input-transcription' && message.text) {
+        setInputText(prevText => {
+          // 如果当前已有文本，则在末尾添加空格再追加新文本
+          const prefix = prevText.trim() ? `${prevText.trim()} ` : '';
+          return `${prefix}${message.text}`;
+        });
+      }
+    };
+
+    window.addEventListener('websocket-message', handleMessage as EventListener);
+    return () => {
+      window.removeEventListener('websocket-message', handleMessage as EventListener);
+    };
+  }, []);
+
   const handleSend = (text: string) => {
     if (!text.trim()) return;
     
@@ -74,6 +100,10 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
       type: 'text-input',
       text: text.trim()
     });
+    
+    if (autoStopMic) {
+      handleMicToggle();
+    }
     
     onStart(isMessageSent.current);
   };
@@ -101,21 +131,48 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
         maxWidth={isMobileView ? "100%" : "800px"}
         h={isMobileView ? "auto" : "auto"}
       >
-        <Input
-          size={isMobileView ? "lg" : "lg"}
-          placeholder="输入你想说的话..."
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          onKeyPress={handleKeyPress}
-          borderRadius="full"
-          p={isMobileView ? 6 : 6}
-          bg="white"
-          border="1px"
-          borderColor="gray.200"
-          fontSize={isMobileView ? "md" : "lg"}
-          h={isMobileView ? "56px" : "auto"}
-          mb={isMobileView ? 2 : 0}
-        />
+        <HStack width="100%">
+          <Input
+            flex={1}
+            size={isMobileView ? "lg" : "lg"}
+            placeholder="输入你想说的话..."
+            value={inputText}
+            onChange={(e) => setInputText(e.target.value)}
+            onKeyPress={handleKeyPress}
+            borderRadius="full"
+            p={isMobileView ? 6 : 6}
+            bg="white"
+            border="1px"
+            borderColor="gray.200"
+            fontSize={isMobileView ? "md" : "lg"}
+            h={isMobileView ? "56px" : "auto"}
+            mb={isMobileView ? 2 : 0}
+          />
+          <IconButton
+            aria-label="Toggle microphone"
+            bg={micOn ? 'green.500' : 'red.500'}
+            color="white"
+            size="lg"
+            borderRadius="full"
+            onClick={handleMicToggle}
+            _hover={{ opacity: 0.8 }}
+          >
+            {micOn ? <BsMicFill /> : <BsMicMuteFill />}
+          </IconButton>
+          <IconButton
+            aria-label="Send message"
+            // icon={<BsSend />}
+            bg="blue.500"
+            color="white"
+            size="lg"
+            borderRadius="full"
+            onClick={() => handleSend(inputText)}
+            disabled={!inputText.trim()}
+            _hover={{ opacity: 0.8 }}
+          >
+            <BsSend />
+          </IconButton>
+        </HStack>
         
         <Grid 
           templateColumns={isMobileView ? "1fr" : "repeat(3, 1fr)"}

@@ -16,7 +16,7 @@ export function useTextInput() {
   const { stopMic, autoStopMic } = useVAD();
   const { captureAllMedia } = useMediaCapture();
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setInputText(e.target.value);
   };
 

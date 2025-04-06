@@ -2,10 +2,10 @@
 import {
   Box, Textarea, IconButton, HStack,
 } from '@chakra-ui/react';
-import { BsMicFill, BsMicMuteFill, BsPaperclip } from 'react-icons/bs';
+import { BsMicFill, BsMicMuteFill, BsPaperclip, BsSend } from 'react-icons/bs';
 import { IoHandRightSharp } from 'react-icons/io5';
 import { FiChevronDown } from 'react-icons/fi';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { InputGroup } from '@/components/ui/input-group';
 import { footerStyles } from './footer-styles';
 import AIStateIndicator from './ai-state-indicator';
@@ -55,7 +55,7 @@ ToggleButton.displayName = 'ToggleButton';
 const ActionButtons = memo(({ micOn, onMicToggle, onInterrupt }: ActionButtonsProps) => (
   <HStack gap={2}>
     <IconButton
-      bg={micOn ? 'green.500' : 'red.500'}
+      // bg={micOn ? 'green.500' : 'red.500'}
       {...footerStyles.footer.actionButton}
       onClick={onMicToggle}
     >
@@ -63,7 +63,7 @@ const ActionButtons = memo(({ micOn, onMicToggle, onInterrupt }: ActionButtonsPr
     </IconButton>
     <IconButton
       aria-label="Raise hand"
-      bg="yellow.500"
+      // bg="yellow.500"
       {...footerStyles.footer.actionButton}
       onClick={onInterrupt}
     >
@@ -80,28 +80,63 @@ const MessageInput = memo(({
   onKeyDown,
   onCompositionStart,
   onCompositionEnd,
-}: MessageInputProps) => (
-  <InputGroup flex={1}>
-    <Box position="relative" width="100%">
-      <IconButton
-        aria-label="Attach file"
-        variant="ghost"
-        {...footerStyles.footer.attachButton}
-      >
-        <BsPaperclip size="24" />
-      </IconButton>
-      <Textarea
-        value={value}
-        onChange={onChange}
-        onKeyDown={onKeyDown}
-        onCompositionStart={onCompositionStart}
-        onCompositionEnd={onCompositionEnd}
-        placeholder="Type your message..."
-        {...footerStyles.footer.input}
-      />
-    </Box>
-  </InputGroup>
-));
+  onSend,
+}: MessageInputProps & { onSend: () => void }) => {
+  useEffect(() => {
+    const handleMessage = (event: CustomEvent) => {
+      const message = event.detail;
+      if (message.type === 'user-input-transcription' && message.text) {
+        onChange({
+          target: {
+            value: (prevValue => {
+              const prefix = prevValue.trim() ? `${prevValue.trim()} ` : '';
+              return `${prefix}${message.text}`;
+            })(value)
+          }
+        } as React.ChangeEvent<HTMLTextAreaElement>);
+      }
+    };
+
+    window.addEventListener('websocket-message', handleMessage as EventListener);
+    return () => {
+      window.removeEventListener('websocket-message', handleMessage as EventListener);
+    };
+  }, [onChange, value]);
+
+  return (
+    <InputGroup flex={1}>
+      <Box position="relative" width="100%">
+        <IconButton
+          aria-label="Attach file"
+          variant="ghost"
+          {...footerStyles.footer.attachButton}
+        >
+          <BsPaperclip size="24" />
+        </IconButton>
+        <Textarea
+          value={value}
+          onChange={onChange}
+          onKeyDown={onKeyDown}
+          onCompositionStart={onCompositionStart}
+          onCompositionEnd={onCompositionEnd}
+          placeholder="Type your message..."
+          {...footerStyles.footer.input}
+        />
+        <IconButton
+          aria-label="Send message"
+          onClick={onSend}
+          disabled={!value.trim()}
+          {...footerStyles.footer.actionButton}
+          position="absolute"
+          right="2"
+          bottom="2"
+        >
+          <BsSend />
+        </IconButton>
+      </Box>
+    </InputGroup>
+  );
+});
 
 MessageInput.displayName = 'MessageInput';
 
@@ -116,6 +151,7 @@ function Footer({ isCollapsed = false, onToggle }: FooterProps): JSX.Element {
     handleInterrupt,
     handleMicToggle,
     micOn,
+    handleSend,
   } = useFooter();
 
   return (
@@ -141,6 +177,7 @@ function Footer({ isCollapsed = false, onToggle }: FooterProps): JSX.Element {
             onKeyDown={handleKeyPress}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
+            onSend={handleSend}
           />
         </HStack>
       </Box>
