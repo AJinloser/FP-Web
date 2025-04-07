@@ -17,6 +17,7 @@ import { wsService } from '@/services/websocket-service';
 interface SidebarProps {
   isCollapsed?: boolean
   onToggle: () => void
+  onReturnHome: () => void
 }
 
 interface HeaderButtonsProps {
@@ -94,18 +95,13 @@ const SidebarContent = memo(({ onSettingsOpen, onNewHistory, onReturnHome }: Hea
 SidebarContent.displayName = 'SidebarContent';
 
 // Main component
-function Sidebar({ isCollapsed = false, onToggle }: SidebarProps): JSX.Element {
+function Sidebar({ isCollapsed = false, onToggle, onReturnHome }: SidebarProps): JSX.Element {
   const {
     settingsOpen,
     onSettingsOpen,
     onSettingsClose,
     createNewHistory,
   } = useSidebar();
-
-  const handleReturnHome = () => {
-    wsService.disconnect();
-    window.location.reload();
-  };
 
   return (
     <Box {...sidebarStyles.sidebar.container(isCollapsed)}>
@@ -115,7 +111,7 @@ function Sidebar({ isCollapsed = false, onToggle }: SidebarProps): JSX.Element {
         <SidebarContent
           onSettingsOpen={onSettingsOpen}
           onNewHistory={createNewHistory}
-          onReturnHome={handleReturnHome}
+          onReturnHome={onReturnHome}
         />
       )}
 

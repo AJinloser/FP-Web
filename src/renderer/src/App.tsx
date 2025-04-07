@@ -28,9 +28,11 @@ import { InputSubtitle } from './components/electron/input-subtitle';
 import { ProactiveSpeakProvider } from './context/proactive-speak-context';
 import { ScreenCaptureProvider } from './context/screen-capture-context';
 import { GroupProvider } from './context/group-context';
+import { wsService } from '@/services/websocket-service';
 // eslint-disable-next-line import/no-extraneous-dependencies, import/newline-after-import
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import { StartPage } from './components/start-page/StartPage';
+import { motion, PanInfo, useAnimation } from 'framer-motion';
 
 function App(): JSX.Element {
   const [showSidebar, setShowSidebar] = useState(true);
@@ -143,6 +145,10 @@ function AppContent({
   const { isLoading } = useLive2DConfig();
   const [showStartPage, setShowStartPage] = useState(true);
   const shouldResetState = useRef(false);
+  const [showLive2D, setShowLive2D] = useState(true);
+  const controls = useAnimation();
+  const panRef = useRef<HTMLDivElement>(null);
+  const lastY = useRef(0);
 
   const isProcessing = aiState === 'thinking-speaking' || aiState === 'listening' || isLoading;
 
@@ -184,6 +190,34 @@ function AppContent({
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // 添加滑动处理函数
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const threshold = 50; // 触发切换的阈值
+    const deltaY = info.offset.y;
+    
+    if (Math.abs(deltaY) > threshold) {
+      if (deltaY > 0) {
+        // 下滑，显示 Live2D
+        setShowLive2D(true);
+        controls.start({ height: "40vh" });
+      } else {
+        // 上滑，隐藏 Live2D
+        setShowLive2D(false);
+        controls.start({ height: "0vh" });
+      }
+    } else {
+      // 如果滑动距离不够，恢复原状
+      controls.start({ height: showLive2D ? "40vh" : "0vh" });
+    }
+  };
+
+  // 将 handleReturnHome 提升到 AppContent 组件
+  const handleReturnHome = () => {
+    // wsService.disconnect();
+    setAiState('idle');  // 重置 AI 状态
+    setShowStartPage(true);  // 返回首页
+  };
+
   if (showStartPage) {
     return (
       <StartPage 
@@ -202,92 +236,106 @@ function AppContent({
         <>
           {isElectron && <TitleBar />}
           <Flex {...layoutStyles.appContainer}>
-            <Button
-              colorScheme="gray"
-              size="sm"
-              onClick={toggleMode}
-              position="fixed"
-              top={4}
-              right={4}
-              zIndex={1000}
-              transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-              bg="white"
-              color="gray.700"
-              _hover={{
-                transform: isProcessing ? 'none' : 'translateY(-2px)',
-                boxShadow: isProcessing ? 'sm' : 'md',
-                bg: isProcessing ? 'gray.100' : 'gray.50',
-              }}
-              borderRadius="xl"
-              boxShadow="sm"
-              _active={{
-                transform: 'translateY(0)',
-                boxShadow: 'sm',
-                bg: 'gray.100',
-              }}
-              disabled={isProcessing}
-              opacity={isProcessing ? 0.6 : 1}
-              cursor={isProcessing ? 'not-allowed' : 'pointer'}
-              title={isProcessing ? '正在处理中，请稍候...' : ''}
-            >
-              {isChatMode ? '切换到 Live2D 模式' : '切换到聊天模式'}
-            </Button>
+            {/* 只在非移动端显示切换按钮 */}
+            {!isMobileView && (
+              <Button
+                colorScheme="gray"
+                size="sm"
+                onClick={toggleMode}
+                position="fixed"
+                top={4}
+                right={4}
+                zIndex={1000}
+                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                bg="white"
+                color="gray.700"
+                _hover={{
+                  transform: isProcessing ? 'none' : 'translateY(-2px)',
+                  boxShadow: isProcessing ? 'sm' : 'md',
+                  bg: isProcessing ? 'gray.100' : 'gray.50',
+                }}
+                borderRadius="xl"
+                boxShadow="sm"
+                _active={{
+                  transform: 'translateY(0)',
+                  boxShadow: 'sm',
+                  bg: 'gray.100',
+                }}
+                disabled={isProcessing}
+                opacity={isProcessing ? 0.6 : 1}
+                cursor={isProcessing ? 'not-allowed' : 'pointer'}
+                title={isProcessing ? '正在处理中，请稍候...' : ''}
+              >
+                {isChatMode ? '切换到 Live2D 模式' : '切换到聊天模式'}
+              </Button>
+            )}
 
             {isMobileView ? (
-              // 移动端布局
-              <Flex direction="column" h="100vh">
-                {viewMode === 'live2d' ? (
-                  // Live2D 模式下的三段式布局
-                  <>
-                    {/* 上部分：Live2D Canvas */}
-                    <Box {...layoutStyles.mobileLayout.live2d}>
-                      <Canvas />
-                    </Box>
-                    
-                    {/* 中部分：聊天记录 */}
-                    <Box {...layoutStyles.mobileLayout.chatPanel}>
-                      {/* 修改顶部按钮样式 */}
-                      <Box {...layoutStyles.mobileLayout.headerButtons}>
-                        <HeaderButtons 
-                          onSettingsOpen={onSettingsOpen}
-                          onNewHistory={createNewHistory}
-                        />
-                      </Box>
-                      <ChatHistoryPanel />
-                    </Box>
-                    
-                    {/* 下部分：输入框 */}
-                    <Box {...layoutStyles.mobileLayout.footer}>
-                      <Footer
-                        isCollapsed={false}
-                        onToggle={() => {}}
+              <Flex direction="column" h="100vh" overflow="hidden">
+                {/* Live2D 部分，使用 motion.div 实现动画 */}
+                <motion.div
+                  animate={controls}
+                  initial={{ height: "40vh" }}
+                  transition={{ type: "spring", damping: 20 }}
+                  style={{ overflow: 'hidden' }}
+                >
+                  <Box height="40vh">
+                    <Canvas />
+                  </Box>
+                </motion.div>
+
+                {/* 可滑动的聊天面板 */}
+                <motion.div
+                  ref={panRef}
+                  drag="y"
+                  dragConstraints={{ top: 0, bottom: 0 }}
+                  dragElastic={0.2}
+                  onDragEnd={handleDragEnd}
+                  style={{ 
+                    flex: 1,
+                    overflow: 'hidden',
+                    touchAction: 'pan-y'
+                  }}
+                >
+                  <Box 
+                    {...layoutStyles.mobileLayout.chatPanel}
+                    height={showLive2D ? "calc(60vh - 56px)" : "calc(100vh - 56px)"}
+                    transition="height 0.3s ease"
+                  >
+                    {/* 顶部按钮和提示区域 */}
+                    <Box 
+                      {...layoutStyles.mobileLayout.headerButtons}
+                      position="relative"
+                    >
+                      <Box
+                        position="absolute"
+                        top="2"
+                        left="50%"
+                        transform="translateX(-50%)"
+                        width="32px"
+                        height="4px"
+                        borderRadius="full"
+                        bg="gray.300"
+                        opacity={0.8}
+                      />
+                      <HeaderButtons 
+                        onSettingsOpen={onSettingsOpen}
+                        onNewHistory={createNewHistory}
+                        onReturnHome={handleReturnHome}
                       />
                     </Box>
-                  </>
-                ) : (
-                  // 聊天模式下的两段式布局
-                  <>
-                    {/* 上部分：聊天记录 */}
-                    <Box {...layoutStyles.mobileLayout.chatPanel}>
-                      {/* 修改顶部按钮样式 */}
-                      <Box {...layoutStyles.mobileLayout.headerButtons}>
-                        <HeaderButtons 
-                          onSettingsOpen={onSettingsOpen}
-                          onNewHistory={createNewHistory}
-                        />
-                      </Box>
-                      <ChatHistoryPanel />
-                    </Box>
-                    
-                    {/* 下部分：输入框 */}
-                    <Box {...layoutStyles.mobileLayout.footer}>
-                      <Footer
-                        isCollapsed={false}
-                        onToggle={() => {}}
-                      />
-                    </Box>
-                  </>
-                )}
+                    <ChatHistoryPanel />
+                  </Box>
+                </motion.div>
+
+                {/* Footer 部分 */}
+                <Box {...layoutStyles.mobileLayout.footer}>
+                  <Footer
+                    isCollapsed={false}
+                    onToggle={() => {}}
+                  />
+                </Box>
+
                 {/* 设置面板 */}
                 {settingsOpen && (
                   <SettingUI
@@ -309,6 +357,7 @@ function AppContent({
                       <Sidebar
                         isCollapsed={!showSidebar}
                         onToggle={() => setShowSidebar(!showSidebar)}
+                        onReturnHome={handleReturnHome}
                       />
                     </Box>
                     <Box {...layoutStyles.mainContent}>
@@ -330,6 +379,7 @@ function AppContent({
                       <HeaderButtons 
                         onSettingsOpen={onSettingsOpen}
                         onNewHistory={createNewHistory}
+                        onReturnHome={handleReturnHome}
                       />
                     </Box>
                     <Box flex="1" overflow="auto">
