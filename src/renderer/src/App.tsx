@@ -33,6 +33,7 @@ import { wsService } from '@/services/websocket-service';
 import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import { StartPage } from './components/start-page/StartPage';
 import { motion, PanInfo, useAnimation } from 'framer-motion';
+import { isMobile } from '@/utils/device-utils';
 
 function App(): JSX.Element {
   const [showSidebar, setShowSidebar] = useState(true);
@@ -149,6 +150,7 @@ function AppContent({
   const controls = useAnimation();
   const panRef = useRef<HTMLDivElement>(null);
   const lastY = useRef(0);
+  const [isMobileView, setIsMobileView] = useState(isMobile());
 
   const isProcessing = aiState === 'thinking-speaking' || aiState === 'listening' || isLoading;
 
@@ -164,22 +166,6 @@ function AppContent({
   };
 
   const isChatMode = viewMode === 'chat';
-
-  // 修改移动端判断逻辑，使用长宽比例
-  const isMobile = () => {
-    // 获取视口宽度和高度
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    
-    // 计算长宽比
-    const aspectRatio = viewportWidth / viewportHeight;
-    
-    // 当长宽比小于 1.2 时认为是移动端布局
-    // 这个比例可以根据实际需求调整
-    return aspectRatio < 1.2;
-  };
-
-  const [isMobileView, setIsMobileView] = useState(isMobile());
 
   // 监听窗口大小变化
   useEffect(() => {

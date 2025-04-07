@@ -8,6 +8,7 @@ import {
   Button,
   HStack,
   IconButton,
+  Flex,
 } from '@chakra-ui/react';
 import { useWebSocket } from '@/context/websocket-context';
 import { useChatHistory } from '@/context/chat-history-context';
@@ -15,6 +16,7 @@ import { useAiState } from '@/context/ai-state-context';
 import { useVAD } from '@/context/vad-context';
 import { useMicToggle } from '@/hooks/utils/use-mic-toggle';
 import { BsMicFill, BsMicMuteFill, BsSend } from 'react-icons/bs';
+import { isMobile } from '@/utils/device-utils';
 
 interface TopicItem {
   title: string;
@@ -52,14 +54,6 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
   const isMessageSent = useRef(false);
   const { handleMicToggle, micOn } = useMicToggle();
   const { autoStopMic } = useVAD();
-
-  // 添加移动端检测逻辑
-  const isMobile = () => {
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-    const aspectRatio = viewportWidth / viewportHeight;
-    return aspectRatio < 1.2;
-  };
 
   const [isMobileView, setIsMobileView] = useState(isMobile());
 
@@ -124,12 +118,13 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
       bg="gray.50"
       p={isMobileView ? "4" : "6"}
       pt={isMobileView ? "8" : "6"}
+      overflowY="auto"
     >
       <VStack 
         gap={isMobileView ? 4 : 6} 
         width={isMobileView ? "100%" : "80%"} 
         maxWidth={isMobileView ? "100%" : "800px"}
-        h={isMobileView ? "auto" : "auto"}
+        h="auto"
       >
         <HStack width="100%">
           <Input
@@ -161,7 +156,6 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
           </IconButton>
           <IconButton
             aria-label="Send message"
-            // icon={<BsSend />}
             bg="blue.500"
             color="white"
             size="lg"
@@ -174,37 +168,39 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
           </IconButton>
         </HStack>
         
-        <Grid 
-          templateColumns={isMobileView ? "1fr" : "repeat(3, 1fr)"}
-          gap={isMobileView ? 3 : 6} 
+        <Flex 
           width="100%"
+          flexWrap="wrap"
+          gap={isMobileView ? "3" : "4"}
+          justifyContent="center"
         >
           {topics.map((topic, index) => (
             <Box 
               key={index}
-              p={isMobileView ? 4 : 4}
+              p={4}
               bg="white"
               borderRadius="lg"
               border="1px"
               borderColor="gray.200"
-              shadow={isMobileView ? "sm" : "none"}
-              minH={isMobileView ? "140px" : "auto"}
+              shadow="sm"
               display="flex"
               flexDirection="column"
+              flex={isMobileView ? "1 1 calc(50% - 8px)" : "1 1 300px"}
+              minW={isMobileView ? "calc(50% - 8px)" : "280px"}
+              maxW={isMobileView ? "none" : "350px"}
             >
               <Text 
-                fontSize={isMobileView ? "xl" : "xl"} 
+                fontSize={isMobileView ? "lg" : "xl"} 
                 fontWeight="bold" 
-                mb={isMobileView ? 3 : 4}
-                flex={isMobileView ? "0 0 auto" : "auto"}
+                mb={3}
+                flex="0 0 auto"
               >
                 {topic.title}
               </Text>
               <VStack 
                 align="stretch" 
-                gap={isMobileView ? 2 : 2}
-                flex={1}
-                justify="space-between"
+                gap={2}
+                flex="1"
               >
                 {topic.subtopics.map((subtopic, subIndex) => (
                   <Button
@@ -212,13 +208,13 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
                     variant="ghost"
                     justifyContent="flex-start"
                     onClick={() => handleSend(subtopic)}
-                    size={isMobileView ? "md" : "md"}
-                    py={isMobileView ? 3 : 3}
-                    height={isMobileView ? "auto" : "auto"}
+                    size="md"
+                    py={2}
+                    height="auto"
                     whiteSpace="normal"
                     textAlign="left"
                     fontSize={isMobileView ? "sm" : "md"}
-                    px={4}
+                    px={3}
                   >
                     {subtopic}
                   </Button>
@@ -226,7 +222,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
               </VStack>
             </Box>
           ))}
-        </Grid>
+        </Flex>
       </VStack>
     </Box>
   );

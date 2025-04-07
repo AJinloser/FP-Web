@@ -2,6 +2,7 @@ import { useEffect, useCallback, useRef } from 'react';
 import { Live2DModel } from 'pixi-live2d-display-lipsyncpatch';
 import * as PIXI from 'pixi.js';
 import { ModelInfo, useLive2DConfig } from '@/context/live2d-config-context';
+import { isMobile } from '@/utils/device-utils';
 
 // Speed of model scaling when using mouse wheel
 const SCALE_SPEED = 0.01;
@@ -46,7 +47,12 @@ export const setModelSize = (
 ) => {
   if (!model || !kScale) return;
   const dpr = Number(window.devicePixelRatio || 1);
-  model.scale.set(Number(kScale));
+  
+  const scale = isMobile()
+    ? Number(kScale) * 0.6  // 移动端缩小到原来的 60%
+    : Number(kScale);       // 桌面端保持原比例
+
+  model.scale.set(scale);
 
   // Update filter resolution for retina displays
   if (model.filters) {
