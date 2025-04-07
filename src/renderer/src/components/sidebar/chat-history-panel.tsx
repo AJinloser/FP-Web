@@ -161,66 +161,51 @@ function ChatHistoryPanel(): JSX.Element {
         <ChatContainer>
           <ChatMessageList>
             {validMessages.length === 0 ? (
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="center"
-                height="100%"
-                color="whiteAlpha.500"
-                fontSize="sm"
+              <ChatMessage
+                model={{
+                  type: "custom",
+                  sender: "System",
+                  direction: "incoming",
+                  position: "single"
+                }}
               >
-                No messages yet. Start a conversation!
-              </Box>
+                <ChatMessage.CustomContent>
+                  <div className="ml-2 py-3 px-4 bg-gray-100 rounded-tr-2xl rounded-b-2xl">
+                    开始一段新的对话吧！
+                  </div>
+                </ChatMessage.CustomContent>
+              </ChatMessage>
             ) : (
-              <>
-                {validMessages.map((msg) => (
-                  <ChatMessage
-                    key={msg.id}
-                    model={{
-                      type: "custom",
-                      sender: msg.role === 'ai'
-                        ? (msg.name || confName || 'AI')
-                        : userName,
-                      direction: msg.role === 'ai' ? 'incoming' : 'outgoing',
-                      position: 'single',
-                    }}
-                    avatarPosition={msg.role === 'ai' ? 'tl' : 'tr'}
-                    avatarSpacer={false}
-                  >
-                    <ChatAvatar>
-                      {msg.role === 'ai' ? (
-                        msg.avatar ? (
-                          <img
-                            src={`${baseUrl}/avatars/${msg.avatar}`}
-                            alt="avatar"
-                            style={{ 
-                              width: '100%', 
-                              height: '100%', 
-                              borderRadius: '50%',
-                              objectFit: 'cover',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                          />
-                        ) : (
-                          <Box
-                            w="100%"
-                            h="100%"
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            bg="blue.50"
-                            color="blue.600"
-                            borderRadius="50%"
-                            fontSize="lg"
-                            fontWeight="bold"
-                          >
-                            {(msg.name && msg.name[0].toUpperCase()) ||
-                              (confName && confName[0].toUpperCase()) ||
-                              'A'}
-                          </Box>
-                        )
+              validMessages.map((msg) => (
+                <ChatMessage
+                  key={msg.id}
+                  model={{
+                    type: "custom",
+                    sender: msg.role === 'ai'
+                      ? (msg.name || confName || 'AI')
+                      : userName,
+                    direction: msg.role === 'ai' ? 'incoming' : 'outgoing',
+                    position: 'single',
+                  }}
+                  avatarPosition={msg.role === 'ai' ? 'tl' : 'tr'}
+                  avatarSpacer={false}
+                >
+                  <ChatAvatar>
+                    {msg.role === 'ai' ? (
+                      msg.avatar ? (
+                        <img
+                          src={`${baseUrl}/avatars/${msg.avatar}`}
+                          alt="avatar"
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        />
                       ) : (
                         <Box
                           w="100%"
@@ -228,36 +213,53 @@ function ChatHistoryPanel(): JSX.Element {
                           display="flex"
                           alignItems="center"
                           justifyContent="center"
-                          bg="green.50"
-                          color="green.600"
+                          bg="blue.50"
+                          color="blue.600"
                           borderRadius="50%"
                           fontSize="lg"
                           fontWeight="bold"
                         >
-                          {userName[0].toUpperCase()}
+                          {(msg.name && msg.name[0].toUpperCase()) ||
+                            (confName && confName[0].toUpperCase()) ||
+                            'A'}
                         </Box>
+                      )
+                    ) : (
+                      <Box
+                        w="100%"
+                        h="100%"
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        bg="green.50"
+                        color="green.600"
+                        borderRadius="50%"
+                        fontSize="lg"
+                        fontWeight="bold"
+                      >
+                        {userName[0].toUpperCase()}
+                      </Box>
+                    )}
+                  </ChatAvatar>
+                  <ChatMessage.CustomContent>
+                    <div className={`ml-2 py-3 px-4 bg-gray-100 rounded-tr-2xl rounded-b-2xl`}>
+                      {msg.isThinking ? (
+                        <Box
+                          className="thinking-indicator"
+                          display="flex"
+                          alignItems="center"
+                          gap={2}
+                        >
+                          <span className="dot-animation">...</span>
+                          正在思考
+                        </Box>
+                      ) : (
+                        <Markdown content={msg.content} />
                       )}
-                    </ChatAvatar>
-                    <ChatMessage.CustomContent>
-                      <div className={`ml-2 py-3 px-4 bg-gray-100 rounded-tr-2xl rounded-b-2xl`}>
-                        {msg.isThinking ? (
-                          <Box
-                            className="thinking-indicator"
-                            display="flex"
-                            alignItems="center"
-                            gap={2}
-                          >
-                            <span className="dot-animation">...</span>
-                            正在思考
-                          </Box>
-                        ) : (
-                          <Markdown content={msg.content} />
-                        )}
-                      </div>
-                    </ChatMessage.CustomContent>
-                  </ChatMessage>
-                ))}
-              </>
+                    </div>
+                  </ChatMessage.CustomContent>
+                </ChatMessage>
+              ))
             )}
           </ChatMessageList>
         </ChatContainer>
