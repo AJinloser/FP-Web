@@ -171,7 +171,7 @@ function ChatHistoryPanel(): JSX.Element {
               >
                 <ChatMessage.CustomContent>
                   <div className="ml-2 py-3 px-4 bg-gray-100 rounded-tr-2xl rounded-b-2xl">
-                    开始一段新的对话吧！
+                  我是水木云帆团队开发的智能体，欢迎来到我们的人生规划与风险保障平台。本平台跟任何保险公司无利益关联，我们秉承中立、公正原则，信息均采集至公开渠道，由大模型智能体生成，仅供参考。
                   </div>
                 </ChatMessage.CustomContent>
               </ChatMessage>
