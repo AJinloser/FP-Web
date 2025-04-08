@@ -194,7 +194,7 @@ function ChatHistoryPanel(): JSX.Element {
                     {msg.role === 'ai' ? (
                       msg.avatar ? (
                         <img
-                          src={`${baseUrl}/avatars/${msg.avatar}`}
+                          src={`${baseUrl}/logo/logo-embedded-chat-avatar.png`}
                           alt="avatar"
                           style={{ 
                             width: '100%', 
@@ -207,22 +207,19 @@ function ChatHistoryPanel(): JSX.Element {
                           }}
                         />
                       ) : (
-                        <Box
-                          w="100%"
-                          h="100%"
-                          display="flex"
-                          alignItems="center"
-                          justifyContent="center"
-                          bg="blue.50"
-                          color="blue.600"
-                          borderRadius="50%"
-                          fontSize="lg"
-                          fontWeight="bold"
-                        >
-                          {(msg.name && msg.name[0].toUpperCase()) ||
-                            (confName && confName[0].toUpperCase()) ||
-                            'A'}
-                        </Box>
+                        <img
+                          src={`${baseUrl}/logo/logo-embedded-chat-avatar.png`}
+                          alt="default avatar"
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        />
                       )
                     ) : (
                       <Box

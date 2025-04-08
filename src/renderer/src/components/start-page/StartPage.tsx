@@ -18,6 +18,8 @@ import { useMicToggle } from '@/hooks/utils/use-mic-toggle';
 import { BsMicFill, BsMicMuteFill, BsSend } from 'react-icons/bs';
 import { isMobile } from '@/utils/device-utils';
 
+
+
 interface TopicItem {
   title: string;
   subtopics: string[];
@@ -54,7 +56,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
   const isMessageSent = useRef(false);
   const { handleMicToggle, micOn } = useMicToggle();
   const { autoStopMic } = useVAD();
-
+  const { baseUrl } = useWebSocket();
   const [isMobileView, setIsMobileView] = useState(isMobile());
 
   useEffect(() => {
@@ -126,6 +128,19 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
         maxWidth={isMobileView ? "100%" : "800px"}
         h="auto"
       >
+        <Box 
+          width={isMobileView ? "120px" : "160px"} 
+          mb={isMobileView ? 4 : 6}
+        >
+          <img
+            src={`${baseUrl}/logo/logo-site.png`}
+            alt="Site Logo"
+            style={{ 
+              width: '100%',
+              height: 'auto'
+            }}
+          />
+        </Box>
         <HStack width="100%">
           <Input
             flex={1}
