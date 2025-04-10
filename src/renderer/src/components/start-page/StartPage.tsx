@@ -129,7 +129,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
         h="auto"
       >
         <Box 
-          width={isMobileView ? "120px" : "160px"} 
+          width={isMobileView ? "240px" : "360px"} 
           mb={isMobileView ? 4 : 6}
         >
           <img
@@ -137,7 +137,8 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
             alt="Site Logo"
             style={{ 
               width: '100%',
-              height: 'auto'
+              height: 'auto',
+              maxWidth: '100%'
             }}
           />
         </Box>
