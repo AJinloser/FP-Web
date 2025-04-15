@@ -34,6 +34,8 @@ import "@chatscope/chat-ui-kit-styles/dist/default/styles.min.css";
 import { StartPage } from './components/start-page/StartPage';
 import { motion, PanInfo, useAnimation } from 'framer-motion';
 import { isMobile } from '@/utils/device-utils';
+import { useWebSocket } from '@/context/websocket-context';
+
 
 function App(): JSX.Element {
   const [showSidebar, setShowSidebar] = useState(true);
@@ -151,6 +153,7 @@ function AppContent({
   const panRef = useRef<HTMLDivElement>(null);
   const lastY = useRef(0);
   const [isMobileView, setIsMobileView] = useState(isMobile());
+  const { reconnect } = useWebSocket();
 
   const isProcessing = aiState === 'thinking-speaking' || aiState === 'listening' || isLoading;
 
@@ -199,9 +202,20 @@ function AppContent({
 
   // 将 handleReturnHome 提升到 AppContent 组件
   const handleReturnHome = () => {
-    // wsService.disconnect();
+    // 1. 中断当前对话
+    wsService.disconnect();  // 断开当前的 WebSocket 连接
+    
+    // 2. 重置所有相关状态
     setAiState('idle');  // 重置 AI 状态
-    setShowStartPage(true);  // 返回首页
+    createNewHistory();  // 创建新的对话历史
+    
+    // 3. 返回首页
+    setShowStartPage(true);
+    
+    // 4. 重新连接 WebSocket，准备新的对话
+    setTimeout(() => {
+      reconnect();
+    }, 100);
   };
 
   if (showStartPage) {
