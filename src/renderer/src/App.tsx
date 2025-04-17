@@ -2,7 +2,7 @@
 import {
   Box, Flex, ChakraProvider, defaultSystem, Button,
 } from '@chakra-ui/react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Canvas from './components/canvas/canvas';
 import Sidebar from './components/sidebar/sidebar';
 import Footer from './components/footer/footer';
@@ -35,6 +35,7 @@ import { StartPage } from './components/start-page/StartPage';
 import { motion, PanInfo, useAnimation } from 'framer-motion';
 import { isMobile } from '@/utils/device-utils';
 import { useWebSocket } from '@/context/websocket-context';
+import { FloatingWindow } from './components/FloatingWindow';
 
 
 function App(): JSX.Element {
@@ -154,6 +155,10 @@ function AppContent({
   const lastY = useRef(0);
   const [isMobileView, setIsMobileView] = useState(isMobile());
   const { reconnect } = useWebSocket();
+  const [specialContent, setSpecialContent] = useState('');
+  const [showFloating, setShowFloating] = useState(false);
+  const lastAiResponseTime = useRef<number>(0);
+  const specialContentRef = useRef('');
 
   const isProcessing = aiState === 'thinking-speaking' || aiState === 'listening' || isLoading;
 
@@ -218,6 +223,42 @@ function AppContent({
     }, 100);
   };
 
+  // 监听特殊内容更新事件
+  useEffect(() => {
+    const handleSpecialContent = (event: CustomEvent) => {
+      const { content } = event.detail;
+      const currentTime = Date.now();
+      
+      // 如果窗口已经显示，追加新的特殊内容
+      if (showFloating) {
+        specialContentRef.current += '\n\n' + content;
+        setSpecialContent(specialContentRef.current);
+        return;
+      }
+      
+      // 如果窗口未显示，且距离上次显示超过500ms，显示新内容
+      if (currentTime - lastAiResponseTime.current > 500) {
+        specialContentRef.current = content;
+        setSpecialContent(content);
+        setShowFloating(true);
+        lastAiResponseTime.current = currentTime;
+      }
+    };
+
+    window.addEventListener('special-content-update', handleSpecialContent as EventListener);
+    return () => {
+      window.removeEventListener('special-content-update', handleSpecialContent as EventListener);
+    };
+  }, [showFloating]);
+
+  // 处理关闭浮动窗口
+  const handleCloseFloating = useCallback(() => {
+    setShowFloating(false);
+    // specialContentRef.current = ''; // 清空特殊内容缓存
+    // 发送关闭事件
+    window.dispatchEvent(new CustomEvent('floating-window-close'));
+  }, []);
+
   if (showStartPage) {
     return (
       <StartPage 
@@ -232,6 +273,13 @@ function AppContent({
   return (
     <>
       <Toaster />
+      {/* 全局悬浮窗口 */}
+      <FloatingWindow
+        content={specialContent}
+        visible={showFloating}
+        onClose={handleCloseFloating}
+      />
+
       {mode === 'window' ? (
         <>
           {isElectron && <TitleBar />}
