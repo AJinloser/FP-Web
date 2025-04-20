@@ -69,72 +69,6 @@ const MessageList = memo(({ messages, messageListRef }: MessageListProps): JSX.E
 
 MessageList.displayName = 'MessageList';
 
-// 添加一个工具函数来过滤思考内容和检测是否在思考
-const messageProcessor = {
-  filterThinkingContent: (content: string): string => {
-    // 找到第一个左括号的位置
-    const firstLeftBracket = content.search(/[（(]/);
-    if (firstLeftBracket === -1) return content;
-
-    // 使用栈来匹配括号
-    const stack: string[] = [];
-    let rightBracketPos = -1;
-    
-    for (let i = firstLeftBracket; i < content.length; i++) {
-      const char = content[i];
-      if (char === '(' || char === '（') {
-        stack.push(char);
-      } else if (char === ')' || char === '）') {
-        stack.pop();
-        if (stack.length === 0) {
-          rightBracketPos = i;
-          break;
-        }
-      }
-    }
-
-    if (rightBracketPos === -1) return content; // 没找到匹配的右括号
-
-    // 只移除第一对匹配的括号内容
-    return content.slice(0, firstLeftBracket) + content.slice(rightBracketPos + 1);
-  },
-  
-  isThinking: (content: string): boolean => {
-    // 找到第一个左括号的位置
-    const firstLeftBracket = content.search(/[（(]/);
-    if (firstLeftBracket === -1) return false;
-
-    // 使用栈来匹配括号
-    const stack: string[] = [];
-    
-    for (let i = firstLeftBracket; i < content.length; i++) {
-      const char = content[i];
-      if (char === '(' || char === '（') {
-        stack.push(char);
-      } else if (char === ')' || char === '）') {
-        stack.pop();
-        if (stack.length === 0) {
-          return false; // 找到了匹配的右括号
-        }
-      }
-    }
-    
-    return stack.length > 0; // 如果栈不为空，说明还有未匹配的左括号
-  },
-  
-  processMessage: (msg: Message): Message => {
-    if (msg.role !== 'ai') return msg;
-    
-    const isThinking = messageProcessor.isThinking(msg.content);
-    
-    return {
-      ...msg,
-      content: isThinking ? '' : messageProcessor.filterThinkingContent(msg.content),
-      isThinking: isThinking
-    };
-  }
-};
-
 // Main component
 export const ChatHistoryPanel: React.FC = () => {
   const { messages } = useChatHistory();
@@ -149,19 +83,14 @@ export const ChatHistoryPanel: React.FC = () => {
     }));
   }, []);
 
-  // 添加一个 ref 来追踪当前正在显示特殊内容的消息 ID
   const currentSpecialMessageId = useRef<string | null>(null);
 
   const renderMessage = (msg: Message) => {
-    const processedMsg = messageProcessor.processMessage(msg);
-    
-    if (processedMsg.role === 'ai' && !processedMsg.isThinking) {
+    if (msg.role === 'ai') {
       const isLatestMessage = messages[messages.length - 1]?.id === msg.id;
-      const { plainText, specialContent, isSpecialContentComplete } = splitMessageContent(processedMsg.content);
+      const { plainText, specialContent, isSpecialContentComplete } = splitMessageContent(msg.content);
       
-      // 如果是最新消息
       if (isLatestMessage) {
-        // 只在特殊内容完整时才发送到悬浮窗
         if (specialContent && 
             specialContent.trim() && 
             isSpecialContentComplete && 
@@ -171,35 +100,31 @@ export const ChatHistoryPanel: React.FC = () => {
           currentSpecialMessageId.current = msg.id;
         }
         
-        // 只显示普通内容
         return (
           <div className="flex flex-col space-y-2">
             <Markdown content={plainText} />
           </div>
         );
       } 
-      // 如果是之前正在显示特殊内容的消息，但现在有了新消息
       else if (msg.id === currentSpecialMessageId.current) {
-        // 显示完整内容（包括特殊内容）
-        currentSpecialMessageId.current = null; // 清除当前显示的特殊内容消息ID
-        console.log('显示完整内容', processedMsg.content);
+        currentSpecialMessageId.current = null;
+        console.log('显示完整内容', msg.content);
         return (
           <div className="flex flex-col space-y-2">
-            <Markdown content={processedMsg.content} />
+            <Markdown content={msg.content} />
           </div>
         );
       }
-      // 其他消息显示完整内容
       else {
         return (
           <div className="flex flex-col space-y-2">
-            <Markdown content={processedMsg.content} />
+            <Markdown content={msg.content} />
           </div>
         );
       }
     }
     
-    return <Markdown content={processedMsg.content} />;
+    return <Markdown content={msg.content} />;
   };
 
   // 监听悬浮窗关闭事件
@@ -266,35 +191,19 @@ export const ChatHistoryPanel: React.FC = () => {
                   >
                     <ChatAvatar>
                       {msg.role === 'ai' ? (
-                        msg.avatar ? (
-                          <img
-                            src={`${baseUrl}/logo/logo-embedded-chat-avatar.png`}
-                            alt="avatar"
-                            style={{ 
-                              width: '100%', 
-                              height: '100%', 
-                              borderRadius: '50%',
-                              objectFit: 'cover',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                          />
-                        ) : (
-                          <img
-                            src={`${baseUrl}/logo/logo-embedded-chat-avatar.png`}
-                            alt="default avatar"
-                            style={{ 
-                              width: '100%', 
-                              height: '100%', 
-                              borderRadius: '50%',
-                              objectFit: 'cover',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center'
-                            }}
-                          />
-                        )
+                        <img
+                          src={`${baseUrl}/logo/logo-embedded-chat-avatar.png`}
+                          alt="avatar"
+                          style={{ 
+                            width: '100%', 
+                            height: '100%', 
+                            borderRadius: '50%',
+                            objectFit: 'cover',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                        />
                       ) : (
                         <Box
                           w="100%"
