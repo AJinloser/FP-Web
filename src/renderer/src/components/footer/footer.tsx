@@ -1,15 +1,16 @@
 /* eslint-disable react/require-default-props */
 import {
-  Box, Textarea, IconButton, HStack,
+  Box, Textarea, IconButton, HStack, Text,
 } from '@chakra-ui/react';
 import { BsMicFill, BsMicMuteFill, BsPaperclip, BsSend } from 'react-icons/bs';
 import { IoHandRightSharp } from 'react-icons/io5';
 import { FiChevronDown } from 'react-icons/fi';
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { InputGroup } from '@/components/ui/input-group';
 import { footerStyles } from './footer-styles';
 import AIStateIndicator from './ai-state-indicator';
 import { useFooter } from '@/hooks/footer/use-footer';
+import { VoiceIndicator } from '@/components/voice/VoiceIndicator';
 
 // Type definitions
 interface FooterProps {
@@ -52,25 +53,38 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => (
 
 ToggleButton.displayName = 'ToggleButton';
 
-const ActionButtons = memo(({ micOn, onMicToggle, onInterrupt }: ActionButtonsProps) => (
-  <HStack gap={2}>
-    <IconButton
-      // bg={micOn ? 'green.500' : 'red.500'}
-      {...footerStyles.footer.actionButton}
-      onClick={onMicToggle}
-    >
-      {micOn ? <BsMicFill /> : <BsMicMuteFill />}
-    </IconButton>
-    <IconButton
-      aria-label="Raise hand"
-      // bg="yellow.500"
-      {...footerStyles.footer.actionButton}
-      onClick={onInterrupt}
-    >
-      <IoHandRightSharp size="24" />
-    </IconButton>
-  </HStack>
-));
+const ActionButtons = memo(({ micOn, onMicToggle, onInterrupt }: ActionButtonsProps) => {
+  const [showVoiceIndicator, setShowVoiceIndicator] = useState(false);
+
+  const handleMicClick = () => {
+    setShowVoiceIndicator(!showVoiceIndicator && !micOn);
+    onMicToggle();
+  };
+
+  return (
+    <Box position="relative">
+      <HStack gap={2}>
+        <IconButton
+          {...footerStyles.footer.actionButton}
+          onClick={handleMicClick}
+          // bg={micOn ? 'green.500' : undefined}
+          // _hover={{
+          //   bg: micOn ? 'green.600' : undefined
+          // }}
+        >
+          {micOn ? <BsMicFill /> : <BsMicMuteFill />}
+        </IconButton>
+        <IconButton
+          aria-label="Raise hand"
+          {...footerStyles.footer.actionButton}
+          onClick={onInterrupt}
+        >
+          <IoHandRightSharp size="24" />
+        </IconButton>
+      </HStack>
+    </Box>
+  );
+});
 
 ActionButtons.displayName = 'ActionButtons';
 
@@ -154,32 +168,42 @@ function Footer({ isCollapsed = false, onToggle }: FooterProps): JSX.Element {
     handleSend,
   } = useFooter();
 
+  const [showVoiceIndicator, setShowVoiceIndicator] = useState(false);
+
+  const handleMicClick = () => {
+    setShowVoiceIndicator(!showVoiceIndicator && !micOn);
+    handleMicToggle();
+  };
+
   return (
-    <Box {...footerStyles.footer.container(isCollapsed)}>
-      <ToggleButton isCollapsed={isCollapsed} onToggle={onToggle} />
+    <Box position="relative">
+      <VoiceIndicator show={showVoiceIndicator && micOn} />
+      <Box {...footerStyles.footer.container(isCollapsed)}>
+        <ToggleButton isCollapsed={isCollapsed} onToggle={onToggle} />
 
-      <Box pt="0" px="4">
-        <HStack width="100%" gap={4}>
-          <Box>
-            <Box mb="1.5">
-              <AIStateIndicator />
+        <Box pt="0" px="4">
+          <HStack width="100%" gap={4}>
+            <Box>
+              <Box mb="1.5">
+                <AIStateIndicator />
+              </Box>
+              <ActionButtons
+                micOn={micOn}
+                onMicToggle={handleMicClick}
+                onInterrupt={handleInterrupt}
+              />
             </Box>
-            <ActionButtons
-              micOn={micOn}
-              onMicToggle={handleMicToggle}
-              onInterrupt={handleInterrupt}
-            />
-          </Box>
 
-          <MessageInput
-            value={inputValue}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyPress}
-            onCompositionStart={handleCompositionStart}
-            onCompositionEnd={handleCompositionEnd}
-            onSend={handleSend}
-          />
-        </HStack>
+            <MessageInput
+              value={inputValue}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyPress}
+              onCompositionStart={handleCompositionStart}
+              onCompositionEnd={handleCompositionEnd}
+              onSend={handleSend}
+            />
+          </HStack>
+        </Box>
       </Box>
     </Box>
   );

@@ -198,14 +198,31 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
     }
     isProcessingRef.current = true;
     setAiStateRef.current('listening');
+    
+    // 发送语音状态更新
+    window.dispatchEvent(new CustomEvent('voice-state', {
+      detail: {
+        type: 'speech-state',
+        isSpeaking: true
+      }
+    }));
   }, []);
 
   /**
    * Handle frame processing event
    */
-  const handleFrameProcessed = useCallback((probs: { isSpeech: number }) => {
+  const handleFrameProcessed = useCallback((probs: { isSpeech: number, notSpeech: number }) => {
     if (probs.isSpeech > previousTriggeredProbabilityRef.current) {
       setPreviousTriggeredProbability(probs.isSpeech);
+      console.log('Speech probability:', probs.isSpeech);
+      
+      // 发送音量信息
+      window.dispatchEvent(new CustomEvent('voice-state', {
+        detail: {
+          type: 'volume',
+          value: probs.isSpeech
+        }
+      }));
     }
   }, []);
 
@@ -217,11 +234,19 @@ export function VADProvider({ children }: { children: React.ReactNode }) {
     console.log('Speech ended');
     audioTaskQueue.clearQueue();
 
-    if (autoStopMicRef.current) {
-      stopMic();
-    } else {
-      console.log('Auto stop mic is on, keeping mic active');
-    }
+    // 发送语音状态更新
+    window.dispatchEvent(new CustomEvent('voice-state', {
+      detail: {
+        type: 'speech-state',
+        isSpeaking: false
+      }
+    }));
+
+    // if (autoStopMicRef.current) {
+    //   stopMic();
+    // } else {
+    //   console.log('Auto stop mic is on, keeping mic active');
+    // }
 
     setPreviousTriggeredProbability(0);
     sendAudioPartitionRef.current(audio);
