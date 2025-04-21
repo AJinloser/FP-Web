@@ -38,7 +38,8 @@ export const sidebarStyles = {
       left: 0,
       top: 0,
       height: '100%',
-      width: '440px',
+      width: '100%',
+      maxWidth: '440px',
       bg: 'white',
       transform: isCollapsed
         ? 'translateX(calc(-100% + 24px))'
@@ -116,7 +117,8 @@ export const sidebarStyles = {
       px: 4,
       display: 'flex',
       flexDirection: 'column',
-      borderTopRadius: 'xl',
+      width: '100%',
+      maxWidth: '100%',
     },
     title: commonStyles.title,
     messageList: {
