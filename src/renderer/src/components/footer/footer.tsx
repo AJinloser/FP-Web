@@ -5,12 +5,13 @@ import {
 import { BsMicFill, BsMicMuteFill, BsPaperclip, BsSend } from 'react-icons/bs';
 import { IoHandRightSharp } from 'react-icons/io5';
 import { FiChevronDown } from 'react-icons/fi';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useState, useCallback } from 'react';
 import { InputGroup } from '@/components/ui/input-group';
 import { footerStyles } from './footer-styles';
 import AIStateIndicator from './ai-state-indicator';
 import { useFooter } from '@/hooks/footer/use-footer';
 import { VoiceIndicator } from '@/components/voice/VoiceIndicator';
+import { useAiState } from '@/context/ai-state-context';
 
 // Type definitions
 interface FooterProps {
@@ -54,23 +55,12 @@ const ToggleButton = memo(({ isCollapsed, onToggle }: ToggleButtonProps) => (
 ToggleButton.displayName = 'ToggleButton';
 
 const ActionButtons = memo(({ micOn, onMicToggle, onInterrupt }: ActionButtonsProps) => {
-  const [showVoiceIndicator, setShowVoiceIndicator] = useState(false);
-
-  const handleMicClick = () => {
-    setShowVoiceIndicator(!showVoiceIndicator && !micOn);
-    onMicToggle();
-  };
-
   return (
     <Box position="relative">
       <HStack gap={2}>
         <IconButton
           {...footerStyles.footer.actionButton}
-          onClick={handleMicClick}
-          // bg={micOn ? 'green.500' : undefined}
-          // _hover={{
-          //   bg: micOn ? 'green.600' : undefined
-          // }}
+          onClick={onMicToggle}
         >
           {micOn ? <BsMicFill /> : <BsMicMuteFill />}
         </IconButton>
@@ -169,15 +159,35 @@ function Footer({ isCollapsed = false, onToggle }: FooterProps): JSX.Element {
   } = useFooter();
 
   const [showVoiceIndicator, setShowVoiceIndicator] = useState(false);
+  const { aiState } = useAiState();
 
-  const handleMicClick = () => {
-    setShowVoiceIndicator(!showVoiceIndicator && !micOn);
-    handleMicToggle();
-  };
+  const handleMicClick = useCallback(() => {
+    if (aiState === 'thinking-speaking') {
+      return;
+    }
+
+    const success = handleMicToggle();
+    
+    if (success) {
+      setShowVoiceIndicator(prev => !micOn);
+    }
+  }, [handleMicToggle, micOn, aiState]);
+
+  useEffect(() => {
+    if (aiState === 'thinking-speaking') {
+      setShowVoiceIndicator(false);
+    }
+  }, [aiState]);
+
+  useEffect(() => {
+    if (!micOn) {
+      setShowVoiceIndicator(false);
+    }
+  }, [micOn]);
 
   return (
     <Box position="relative">
-      <VoiceIndicator show={showVoiceIndicator && micOn} />
+      <VoiceIndicator show={showVoiceIndicator && aiState !== 'thinking-speaking'} />
       <Box {...footerStyles.footer.container(isCollapsed)}>
         <ToggleButton isCollapsed={isCollapsed} onToggle={onToggle} />
 

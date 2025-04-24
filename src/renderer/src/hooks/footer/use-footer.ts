@@ -18,7 +18,7 @@ export const useFooter = () => {
   } = useTextInput();
 
   const { interrupt } = useInterrupt();
-  const { startMic, autoStartMicOn } = useVAD();
+  // const { startMic, autoStartMicOn } = useVAD();
   const { handleMicToggle, micOn } = useMicToggle();
   const { setAiState, aiState } = useAiState();
   const { sendTriggerSignal } = useTriggerSpeak();
@@ -36,9 +36,9 @@ export const useFooter = () => {
   const handleInterrupt = () => {
     if (aiState === AiStateEnum.THINKING_SPEAKING) {
       interrupt();
-      if (autoStartMicOn) {
-        startMic();
-      }
+      // if (autoStartMicOn) {
+      //   startMic();
+      // }
     } else if (settings.allowButtonTrigger) {
       sendTriggerSignal(-1);
     }

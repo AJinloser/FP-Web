@@ -18,7 +18,7 @@ export function useInputSubtitle() {
   } = useTextInput();
 
   const { messages } = useChatHistory();
-  const { startMic, autoStartMicOn } = useVAD();
+  // const { startMic, autoStartMicOn } = useVAD();
   const { handleMicToggle, micOn } = useMicToggle();
   const { aiState, setAiState } = useAiState();
   const { interrupt } = useInterrupt();
@@ -32,9 +32,9 @@ export function useInputSubtitle() {
 
   const handleInterrupt = () => {
     interrupt();
-    if (autoStartMicOn) {
-      startMic();
-    }
+    // if (autoStartMicOn) {
+    //   startMic();
+    // }
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
