@@ -27,11 +27,16 @@ interface SubtitleTextProps {
 }
 
 // Reusable components
-const SubtitleText = memo(({ text }: SubtitleTextProps) => (
-  <Text {...canvasStyles.subtitle.text}>
-    {text}
-  </Text>
-));
+const SubtitleText = memo(({ text }: SubtitleTextProps) => {
+  // 去除文本中的所有*号
+  const cleanText = text.replace(/\*/g, '');
+  
+  return (
+    <Text {...canvasStyles.subtitle.text}>
+      {cleanText}
+    </Text>
+  );
+});
 
 SubtitleText.displayName = 'SubtitleText';
 
