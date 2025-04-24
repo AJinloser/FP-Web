@@ -108,6 +108,18 @@ export const sidebarStyles = {
         bg: 'gray.100'
       },
     },
+    selectItem: {
+      p: 2,
+      cursor: 'pointer',
+      color: 'gray.700',
+      _hover: {
+        bg: 'gray.50',
+      },
+      _selected: {
+        bg: 'gray.100',
+      },
+      transition: 'all 0.2s',
+    },
   },
 
   chatHistoryPanel: {

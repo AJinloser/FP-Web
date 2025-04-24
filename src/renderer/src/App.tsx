@@ -36,7 +36,7 @@ import { motion, PanInfo, useAnimation } from 'framer-motion';
 import { isMobile } from '@/utils/device-utils';
 import { useWebSocket } from '@/context/websocket-context';
 import { FloatingWindow } from './components/FloatingWindow';
-
+import { SelectionProvider } from './context/selection-context';
 
 function App(): JSX.Element {
   const [showSidebar, setShowSidebar] = useState(true);
@@ -95,18 +95,20 @@ function App(): JSX.Element {
                         <VADProvider>
                           <BgUrlProvider>
                             <GroupProvider>
-                              <WebSocketHandler>
-                                <AppContent 
-                                  mode={mode}
-                                  viewMode={viewMode}
-                                  setViewMode={setViewMode}
-                                  showSidebar={showSidebar}
-                                  setShowSidebar={setShowSidebar}
-                                  isFooterCollapsed={isFooterCollapsed}
-                                  setIsFooterCollapsed={setIsFooterCollapsed}
-                                  isElectron={isElectron}
-                                />
-                              </WebSocketHandler>
+                              <SelectionProvider>
+                                <WebSocketHandler>
+                                  <AppContent 
+                                    mode={mode}
+                                    viewMode={viewMode}
+                                    setViewMode={setViewMode}
+                                    showSidebar={showSidebar}
+                                    setShowSidebar={setShowSidebar}
+                                    isFooterCollapsed={isFooterCollapsed}
+                                    setIsFooterCollapsed={setIsFooterCollapsed}
+                                    isElectron={isElectron}
+                                  />
+                                </WebSocketHandler>
+                              </SelectionProvider>
                             </GroupProvider>
                           </BgUrlProvider>
                         </VADProvider>

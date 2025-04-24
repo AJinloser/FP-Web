@@ -81,6 +81,7 @@ export interface MessageEvent {
   available_tts_models?: string[];
   current_tts_model?: string;
   should_process?: boolean;
+  options?: string[];
 }
 
 class WebSocketService {

@@ -18,6 +18,7 @@ import { useMicToggle } from '@/hooks/utils/use-mic-toggle';
 import { BsMicFill, BsMicMuteFill, BsSend } from 'react-icons/bs';
 import { isMobile } from '@/utils/device-utils';
 import { VoiceIndicator } from '@/components/voice/VoiceIndicator';
+import { useSelection } from '@/context/selection-context';
 
 interface TopicItem {
   title: string;
@@ -26,20 +27,20 @@ interface TopicItem {
 
 const topics: TopicItem[] = [
   {
-    title: '健康',
-    subtopics: ['健康险保单哪个好？', '医疗开支谁来支付？', '买了保单会不会拒赔？']
+    title: '理财',
+    subtopics: ['何时能够实现财富自由？', '如何为子女教育做准备？']
   },
   {
-    title: '理想',
-    subtopics: ['多种目标如何实现？']
+    title: '健康',
+    subtopics: ['健康险保单哪个好？', '医疗开支谁来支付？', '买了保单会不会拒赔？']
   },
   {
     title: '养老',
     subtopics: ['到底有没有足够资金养老？', '购买商业年金到底有没有用？', '该不该开设个人养老金账户？']
   },
   {
-    title: '理财',
-    subtopics: ['何时能够实现财富自由？', '如何为子女教育做准备？']
+    title: '理想',
+    subtopics: ['多种目标如何实现？']
   }
 ];
 
@@ -57,6 +58,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
   const { baseUrl } = useWebSocket();
   const [isMobileView, setIsMobileView] = useState(isMobile());
   const [showVoiceIndicator, setShowVoiceIndicator] = useState(false);
+  const { options, setCurrentSelection } = useSelection();
 
   useEffect(() => {
     const handleResize = () => {
@@ -85,15 +87,17 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
     };
   }, []);
 
-  const handleSend = (text: string) => {
+  const handleSend = (text: string, index: number) => {
     if (!text.trim()) return;
     
+    setCurrentSelection(options[index]);
     isMessageSent.current = true;
     setAiState('thinking-speaking');
     appendHumanMessage(text.trim());
     sendMessage({
       type: 'text-input',
-      text: text.trim()
+      text: text.trim(),
+      selection: options[index]
     });
     
     onStart(isMessageSent.current);
@@ -101,7 +105,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && inputText.trim()) {
-      handleSend(inputText);
+      handleSend(inputText, 0);
     }
   };
 
@@ -177,7 +181,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
               color="white"
               size="lg"
               borderRadius="full"
-              onClick={() => handleSend(inputText)}
+              onClick={() => handleSend(inputText, 0)}
               disabled={!inputText.trim()}
               _hover={{ opacity: 0.8 }}
             >
@@ -227,7 +231,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
                     key={subIndex}
                     variant="ghost"
                     justifyContent="flex-start"
-                    onClick={() => handleSend(subtopic)}
+                    onClick={() => handleSend(subtopic, index)}
                     size="md"
                     py={2}
                     height="auto"
