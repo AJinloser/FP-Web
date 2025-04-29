@@ -2,7 +2,7 @@
 /* eslint-disable import/order */
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable react/require-default-props */
-import { Box } from '@chakra-ui/react';
+import { Box, IconButton, Tooltip } from '@chakra-ui/react';
 import {
   memo, useEffect, useRef, useCallback, useState, useMemo,
 } from 'react';
@@ -18,6 +18,7 @@ import { useWebSocket } from '@/context/websocket-context';
 import { Markdown } from '@/components/sidebar/markdown';
 import { FloatingWindow } from '../FloatingWindow';
 import { splitMessageContent } from '../../utils/contentSplitter';
+import { FiThumbsUp, FiThumbsDown } from 'react-icons/fi';
 
 // Type definitions
 interface MessageListProps {
@@ -73,7 +74,7 @@ MessageList.displayName = 'MessageList';
 export const ChatHistoryPanel: React.FC = () => {
   const { messages } = useChatHistory();
   const { confName } = useConfig();
-  const { baseUrl } = useWebSocket();
+  const { baseUrl, sendMessage } = useWebSocket();
   const userName = "Me";
 
   // 创建一个事件发送器，用于通知 App 组件显示特殊内容
@@ -147,6 +148,111 @@ export const ChatHistoryPanel: React.FC = () => {
       window.removeEventListener('floating-window-close', handleFloatingClose);
     };
   }, []);
+
+  const MessageBubble = memo(({ message }: { message: Message }) => {
+    const [showFeedback, setShowFeedback] = useState(false);
+    // 添加点赞状态
+    const [likeStatus, setLikeStatus] = useState<'like' | 'dislike' | null>(null);
+
+    const handleFeedback = (rating: 'like' | 'dislike') => {
+      if (!message.message_id) {
+        console.log('没有 message_id');
+        return;
+      }
+      
+      // 如果点击的是当前状态,则取消点赞/点踩
+      if (likeStatus === rating) {
+        console.log('取消反馈', message.message_id);
+        setLikeStatus(null);
+        sendMessage({
+          type: 'feedback',
+          message_id: message.message_id,
+          rating: null,
+          content: message.content
+        });
+      } else {
+        // 否则设置新的状态
+        console.log('发送反馈消息', message.message_id, rating);
+        setLikeStatus(rating);
+        sendMessage({
+          type: 'feedback',
+          message_id: message.message_id,
+          rating: rating,
+          content: message.content
+        });
+      }
+    };
+
+    return (
+      <Box
+        position="relative"
+        onMouseEnter={() => setShowFeedback(true)}
+        onMouseLeave={() => setShowFeedback(false)}
+      >
+        {/* 原有的消息气泡内容 */}
+        <div className={`ml-2 py-3 px-4 bg-gray-100 rounded-tr-2xl rounded-b-2xl`}>
+          {renderMessage(message)}
+        </div>
+        
+        {/* 反馈按钮 - 修改定位和样式 */}
+        {showFeedback && message.role === 'ai' && (
+          <Box
+            position="absolute"
+            bottom="0" // 调整位置,避免遮挡
+            right="2"
+            display="flex"
+            gap="2"
+            bg="white"
+            p="1"
+            borderRadius="md"
+            boxShadow="sm"
+            zIndex="1" // 确保按钮在上层
+          >
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <IconButton
+                  aria-label="Like"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleFeedback('like')}
+                  color={likeStatus === 'like' ? 'blue.500' : 'gray.500'} // 根据状态改变颜色
+                >
+                  <FiThumbsUp style={{ 
+                    fill: likeStatus === 'like' ? 'currentColor' : 'none' 
+                  }} />
+                </IconButton>
+              </Tooltip.Trigger>
+              <Tooltip.Positioner>
+                <Tooltip.Content>
+                  {likeStatus === 'like' ? '取消点赞' : '点赞'}
+                </Tooltip.Content>
+              </Tooltip.Positioner>
+            </Tooltip.Root>
+            <Tooltip.Root>
+              <Tooltip.Trigger asChild>
+                <IconButton
+                  aria-label="Dislike"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleFeedback('dislike')}
+                  color={likeStatus === 'dislike' ? 'red.500' : 'gray.500'} // 根据状态改变颜色
+                >
+                  <FiThumbsDown style={{ 
+                    fill: likeStatus === 'dislike' ? 'currentColor' : 'none' 
+                  }} />
+                </IconButton>
+              </Tooltip.Trigger>
+              <Tooltip.Positioner>
+                <Tooltip.Content>
+                  {likeStatus === 'dislike' ? '取消点踩' : '点踩'}
+                </Tooltip.Content>
+              </Tooltip.Positioner>
+            </Tooltip.Root>
+          </Box>
+        )}
+      </Box>
+    );
+  });
 
   return (
     <>
@@ -222,9 +328,7 @@ export const ChatHistoryPanel: React.FC = () => {
                       )}
                     </ChatAvatar>
                     <ChatMessage.CustomContent>
-                      <div className={`ml-2 py-3 px-4 bg-gray-100 rounded-tr-2xl rounded-b-2xl`}>
-                        {renderMessage(msg)}
-                      </div>
+                      <MessageBubble message={msg} />
                     </ChatMessage.CustomContent>
                   </ChatMessage>
                 ))

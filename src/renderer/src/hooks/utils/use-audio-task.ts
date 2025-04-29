@@ -66,7 +66,8 @@ export const useAudioTask = () => {
 
     if (displayText) {
       appendText(displayText.text);
-      appendAI(displayText.text, displayText.name, displayText.avatar);
+      console.log('appendAI', displayText.message_id);
+      appendAI(displayText.text, displayText.name, displayText.avatar, displayText.message_id);
       if (audioBase64) {
         updateSubtitle(displayText.text);
       }

@@ -155,6 +155,7 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           console.log('Audio playback intercepted. Sentence:', message.display_text?.text);
         } else {
           console.log("actions", message.actions);
+          console.log("message_id", message.display_text?.message_id);
           addAudioTask({
             audioBase64: message.audio || '',
             volumes: message.volumes || [],

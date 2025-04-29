@@ -9,6 +9,7 @@ export interface DisplayText {
   text: string;
   name: string;
   avatar: string;
+  message_id: string;
 }
 
 interface BackgroundFile {
@@ -32,6 +33,7 @@ export interface Message {
   timestamp: string;
   name?: string;
   avatar?: string;
+  message_id?: string;
   isThinking?: boolean;
 }
 

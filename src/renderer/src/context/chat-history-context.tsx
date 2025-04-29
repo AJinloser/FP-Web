@@ -13,7 +13,7 @@ interface ChatHistoryState {
   historyList: HistoryInfo[];
   currentHistoryUid: string | null;
   appendHumanMessage: (content: string) => void;
-  appendAIMessage: (content: string, name?: string, avatar?: string) => void;
+  appendAIMessage: (content: string, name?: string, avatar?: string, message_id?: string) => void;
   setMessages: (messages: Message[]) => void;
   setHistoryList: (
     value: HistoryInfo[] | ((prev: HistoryInfo[]) => HistoryInfo[])
@@ -76,14 +76,23 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
   /**
    * Append or update an AI message in the chat history
    * @param content - Message content
+   * @param name - Optional display name
+   * @param avatar - Optional avatar URL
+   * @param message_id - Optional message ID from Dify API
    */
-  const appendAIMessage = useCallback((content: string, name?: string, avatar?: string) => {
+  const appendAIMessage = useCallback((
+    content: string, 
+    name?: string, 
+    avatar?: string,
+    message_id?: string
+  ) => {
     setMessages((prevMessages) => {
       const lastMessage = prevMessages[prevMessages.length - 1];
 
       // If forceNewMessage is true or last message is not from AI, create new message
       if (forceNewMessage || !lastMessage || lastMessage.role !== 'ai') {
         setForceNewMessage(false); // Reset the flag
+        console.log('创建新的 AI 消息', message_id);
         return [...prevMessages, {
           id: Date.now().toString(),
           content,
@@ -91,6 +100,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
           timestamp: new Date().toISOString(),
           name,
           avatar,
+          message_id
         }];
       }
 
@@ -101,6 +111,7 @@ export function ChatHistoryProvider({ children }: { children: React.ReactNode })
           ...lastMessage,
           content: lastMessage.content + content,
           timestamp: new Date().toISOString(),
+          message_id: message_id || lastMessage.message_id
         },
       ];
     });
