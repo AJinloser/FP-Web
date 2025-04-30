@@ -3,17 +3,16 @@ import {
   Box,
   Input,
   VStack,
-  Grid,
   Text,
   Button,
   HStack,
   IconButton,
   Flex,
+  Switch,
 } from '@chakra-ui/react';
 import { useWebSocket } from '@/context/websocket-context';
 import { useChatHistory } from '@/context/chat-history-context';
 import { useAiState } from '@/context/ai-state-context';
-import { useVAD } from '@/context/vad-context';
 import { useMicToggle } from '@/hooks/utils/use-mic-toggle';
 import { BsMicFill, BsMicMuteFill, BsSend } from 'react-icons/bs';
 import { isMobile } from '@/utils/device-utils';
@@ -27,26 +26,74 @@ interface TopicItem {
 
 const topics: TopicItem[] = [
   {
-    title: '理财',
-    subtopics: ['何时能够实现财富自由？', '如何为子女教育做准备？']
-  },
-  {
-    title: '健康',
-    subtopics: ['健康险保单哪个好？', '医疗开支谁来支付？', '买了保单会不会拒赔？']
-  },
-  {
     title: '养老',
-    subtopics: ['到底有没有足够资金养老？', '购买商业年金到底有没有用？', '该不该开设个人养老金账户？']
+    subtopics: ['我怎么知道有没有足够资金养老？']
   },
   {
-    title: '理想',
-    subtopics: ['多种目标如何实现？']
+    title: '通用',
+    subtopics: ['北京市提供哪些养老服务？', '怎样选择是否延迟退休？', '清华教职工能拿到哪些员工福利？']
+  },
+  {
+    title: '寿险',
+    subtopics: ['如何选择寿险？']
+  },
+  {
+    title: '健康险',
+    subtopics: ['生病了保险到底能赔多少？','我买了保险，怎么拒赔？']
+  },
+  {
+    title:'人生规划',
+    subtopics:['我希望女儿能接受更好的教育，不知道应该让她接受什么培养路线？',
+    '应该咬咬牙买房，还是继续租房等房价降下来？',
+    '我到底该不该买车呢，买什么车？',
+    '我想赚些外快，开一家辅导班或者培训班的创业合适吗？']
   }
 ];
 
 interface StartPageProps {
   onStart: (isMessageSent: boolean) => void;
 }
+
+// 添加模式类型定义
+type Mode = 'written' | 'voice';
+
+// 添加 API 配置
+interface ApiConfig {
+  type: string;
+  api_key: string;
+}
+
+const apiConfigs: Record<string, ApiConfig> = {
+  '养老': {
+    type: 'change_api',
+    api_key: 'app-NiDDZo2vqgZJKpeRUCqVOQMB'  // 待填写
+  },
+  '通用': {
+    type: 'change_api',
+    api_key: 'YOUR_HEALTH_API_KEY'   // 待填写
+  },
+  '寿险': {
+    type: 'change_api',
+    api_key: 'app-aQC3IJycLjRTna436I5IKFfB'  // 待填写
+  },
+  '健康险': {
+    type: 'change_api',
+    api_key: 'app-weB7ztnoK8sF2xiSFvwMSgzL'    // 待填写
+  },
+  '人生规划': {
+    type: 'change_api',
+    api_key: 'app-TDeTJaR7ofjZafE1CKSIFNZj'    // 待填写
+  }
+};
+
+// 添加外部链接配置
+const externalLinks: Record<string, string> = {
+  '养老': 'http://skysail.top/chat/ee6y7Vf6YQrvvpYZ',
+  '通用': 'http://47.238.246.199/chat/xLwFvATCNJIHppX1',
+  '寿险': 'http://47.238.246.199/chat/dPu5OwsSpVWI7Gzd',
+  '健康险': 'http://47.238.246.199/chat/LawAvtzrWRuaDdJS',
+  '人生规划': 'http://47.238.246.199/chat/Pobg9z5L9fzPmWgN'
+};
 
 export function StartPage({ onStart }: StartPageProps): JSX.Element {
   const [inputText, setInputText] = useState('');
@@ -59,6 +106,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
   const [isMobileView, setIsMobileView] = useState(isMobile());
   const [showVoiceIndicator, setShowVoiceIndicator] = useState(false);
   const { options, setCurrentSelection } = useSelection();
+  const [mode, setMode] = useState<Mode>('voice');
 
   useEffect(() => {
     const handleResize = () => {
@@ -114,6 +162,35 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
     handleMicToggle();
   };
 
+  const handleModeChange = (value: Mode) => {
+    console.log('Mode changed to:', value);
+    setMode(value);
+  };
+
+  const handleTopicClick = async (text: string, index: number, topicTitle: string) => {
+    if (mode === 'written') {
+      // 跳转到外部链接
+      const link = externalLinks[topicTitle];
+      if (link) {
+        console.log('Redirecting to:', link);
+        window.open(link, '_blank');
+      }
+    } else {
+      // 语音模式
+      // 首先发送 API 变更请求
+      if(topicTitle !== '通用'){
+        const apiConfig = apiConfigs[topicTitle];
+        if (apiConfig) {
+          console.log('Sending API change request:', apiConfig);
+          await sendMessage(apiConfig);
+        }
+      }
+      
+      // 然后发送问题
+      handleSend(text, index);
+    }
+  };
+
   return (
     <Box 
       height="100vh" 
@@ -147,7 +224,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
           />
         </Box>
         
-        <Box position="relative" width="100%" mb={showVoiceIndicator && micOn ? "120px" : 0}>
+        <Box position="relative" width="100%" maxWidth="600px" mb={showVoiceIndicator && micOn ? "120px" : 0}>
           <HStack width="100%">
             <Input
               flex={1}
@@ -192,16 +269,50 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
           <VoiceIndicator show={showVoiceIndicator && micOn} position="bottom" />
         </Box>
 
+        <Box width="100%" maxWidth="600px" bg="white" p={4} borderRadius="lg" shadow="sm">
+          <HStack justify="space-between" align="center" mb={2}>
+            <Switch.Root
+              id="mode-switch"
+              size="lg"
+              colorPalette="blue"
+              checked={mode === 'voice'}
+              onCheckedChange={(e) => handleModeChange(e.checked ? 'voice' : 'written')}
+            >
+              <Switch.HiddenInput />
+              <Switch.Control>
+                <Switch.Thumb />
+              </Switch.Control>
+              <Switch.Label>
+                {mode === 'written' ? '当前：书面模式' : '当前：语音模式'}
+              </Switch.Label>
+            </Switch.Root>
+          </HStack>
+          <VStack align="start" gap={1}>
+            <Text fontSize="sm" color="gray.500">
+              {mode === 'written' 
+                ? '书面模式：纯文本聊天形式，便于理论阐述。点击问题可直接跳转到专业咨询页面。' 
+                : '语音模式：虚拟人和语音交流，便于交互理解。可通过语音或文字输入进行对话。'}
+            </Text>
+            <Text fontSize="xs" color="gray.400">
+              {mode === 'written'
+                ? '提示：在书面模式下，系统会为您提供更详细的文字解答和专业资源链接。'
+                : '提示：在语音模式下，虚拟人将通过语音与您进行自然对话，提供更直观的交互体验。'}
+            </Text>
+          </VStack>
+        </Box>
+
         <Flex 
           width="100%"
+          maxWidth="800px"
           flexWrap="wrap"
-          gap={isMobileView ? "3" : "4"}
+          gap={4}
           justifyContent="center"
+          mt={2}
         >
           {topics.map((topic, index) => (
             <Box 
               key={index}
-              p={4}
+              p={3}
               bg="white"
               borderRadius="lg"
               border="1px"
@@ -209,36 +320,47 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
               shadow="sm"
               display="flex"
               flexDirection="column"
-              flex={isMobileView ? "1 1 calc(50% - 8px)" : "1 1 300px"}
-              minW={isMobileView ? "calc(50% - 8px)" : "280px"}
-              maxW={isMobileView ? "none" : "350px"}
+              width={isMobileView ? "calc(50% - 8px)" : "220px"}
+              height="200px"
+              overflow="hidden"
             >
               <Text 
-                fontSize={isMobileView ? "lg" : "xl"} 
+                fontSize="lg"
                 fontWeight="bold" 
-                mb={3}
-                flex="0 0 auto"
+                mb={2}
               >
                 {topic.title}
               </Text>
               <VStack 
                 align="stretch" 
-                gap={2}
-                flex="1"
+                gap={1.5}
+                overflow="auto"
+                flex={1}
+                css={{
+                  '&::-webkit-scrollbar': {
+                    width: '4px',
+                  },
+                  '&::-webkit-scrollbar-track': {
+                    background: 'transparent',
+                  },
+                  '&::-webkit-scrollbar-thumb': {
+                    background: '#CBD5E0',
+                    borderRadius: '4px',
+                  },
+                }}
               >
                 {topic.subtopics.map((subtopic, subIndex) => (
                   <Button
                     key={subIndex}
+                    onClick={() => handleTopicClick(subtopic, index, topic.title)}
                     variant="ghost"
                     justifyContent="flex-start"
-                    onClick={() => handleSend(subtopic, index)}
-                    size="md"
-                    py={2}
+                    size="sm"
+                    py={1}
                     height="auto"
                     whiteSpace="normal"
                     textAlign="left"
-                    fontSize={isMobileView ? "sm" : "md"}
-                    px={3}
+                    fontSize="sm"
                   >
                     {subtopic}
                   </Button>

@@ -308,6 +308,16 @@ function WebSocketHandler({ children }: { children: React.ReactNode }) {
           setOptions(message.options);
         }
         break;
+      case 'change_api':
+        if (message.api_key) {
+          console.log('Changing API key:', message.api_key);
+          // 发送 API 变更请求到后端
+          wsService.sendMessage({
+            type: 'change_api',
+            api_key: message.api_key
+          });
+        }
+        break;
       default:
         console.warn('Unknown message type:', message.type);
     }
