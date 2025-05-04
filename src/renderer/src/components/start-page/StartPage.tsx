@@ -301,73 +301,166 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
           </VStack>
         </Box>
 
-        <Flex 
+        <Flex
           width="100%"
-          maxWidth="800px"
-          flexWrap="wrap"
+          maxWidth="900px"
+          minHeight="440px"
           gap={4}
           justifyContent="center"
+          alignItems="stretch"
           mt={2}
+          direction={isMobileView ? "column" : "row"}
         >
-          {topics.map((topic, index) => (
-            <Box 
-              key={index}
-              p={3}
-              bg="white"
-              borderRadius="lg"
-              border="1px"
-              borderColor="gray.200"
-              shadow="sm"
-              display="flex"
-              flexDirection="column"
-              width={isMobileView ? "calc(50% - 8px)" : "220px"}
-              height="200px"
-              overflow="hidden"
-            >
-              <Text 
-                fontSize="lg"
-                fontWeight="bold" 
-                mb={2}
-              >
-                {topic.title}
-              </Text>
-              <VStack 
-                align="stretch" 
-                gap={1.5}
-                overflow="auto"
-                flex={1}
-                css={{
-                  '&::-webkit-scrollbar': {
-                    width: '4px',
-                  },
-                  '&::-webkit-scrollbar-track': {
-                    background: 'transparent',
-                  },
-                  '&::-webkit-scrollbar-thumb': {
-                    background: '#CBD5E0',
-                    borderRadius: '4px',
-                  },
-                }}
-              >
-                {topic.subtopics.map((subtopic, subIndex) => (
-                  <Button
-                    key={subIndex}
-                    onClick={() => handleTopicClick(subtopic, index, topic.title)}
-                    variant="ghost"
-                    justifyContent="flex-start"
-                    size="sm"
-                    py={1}
-                    height="auto"
-                    whiteSpace="normal"
-                    textAlign="left"
-                    fontSize="sm"
+          {/* 左侧四宫格 */}
+          <Flex
+            flexDirection="column"
+            gap={4}
+            flex={isMobileView ? "unset" : "0 0 480px"}
+            width={isMobileView ? "100%" : "480px"}
+          >
+            <Flex gap={4}>
+              {topics.slice(0, 2).map((topic, idx) => (
+                <Box
+                  key={topic.title}
+                  bg="white"
+                  borderRadius="lg"
+                  border="1px"
+                  borderColor="gray.200"
+                  shadow="sm"
+                  p={3}
+                  width={isMobileView ? "100%" : "220px"}
+                  height={isMobileView ? "auto" : "200px"}
+                  display="flex"
+                  flexDirection="column"
+                  overflow="hidden"
+                >
+                  <Text fontSize="lg" fontWeight="bold" mb={2}>{topic.title}</Text>
+                  <VStack
+                    align="stretch"
+                    gap={1.5}
+                    overflow="auto"
+                    flex={1}
+                    css={{
+                      '&::-webkit-scrollbar': { width: '4px' },
+                      '&::-webkit-scrollbar-track': { background: 'transparent' },
+                      '&::-webkit-scrollbar-thumb': { background: '#CBD5E0', borderRadius: '4px' },
+                    }}
                   >
-                    {subtopic}
-                  </Button>
-                ))}
-              </VStack>
-            </Box>
-          ))}
+                    {topic.subtopics.map((subtopic, subIndex) => (
+                      <Button
+                        key={subIndex}
+                        onClick={() => handleTopicClick(subtopic, idx, topic.title)}
+                        variant="ghost"
+                        justifyContent="flex-start"
+                        size="sm"
+                        py={1}
+                        height="auto"
+                        whiteSpace="normal"
+                        textAlign="left"
+                        fontSize="sm"
+                      >
+                        {subtopic}
+                      </Button>
+                    ))}
+                  </VStack>
+                </Box>
+              ))}
+            </Flex>
+            <Flex gap={4}>
+              {topics.slice(2, 4).map((topic, idx) => (
+                <Box
+                  key={topic.title}
+                  bg="white"
+                  borderRadius="lg"
+                  border="1px"
+                  borderColor="gray.200"
+                  shadow="sm"
+                  p={3}
+                  width={isMobileView ? "100%" : "220px"}
+                  height={isMobileView ? "auto" : "200px"}
+                  display="flex"
+                  flexDirection="column"
+                  overflow="hidden"
+                >
+                  <Text fontSize="lg" fontWeight="bold" mb={2}>{topic.title}</Text>
+                  <VStack
+                    align="stretch"
+                    gap={1.5}
+                    overflow="auto"
+                    flex={1}
+                    css={{
+                      '&::-webkit-scrollbar': { width: '4px' },
+                      '&::-webkit-scrollbar-track': { background: 'transparent' },
+                      '&::-webkit-scrollbar-thumb': { background: '#CBD5E0', borderRadius: '4px' },
+                    }}
+                  >
+                    {topic.subtopics.map((subtopic, subIndex) => (
+                      <Button
+                        key={subIndex}
+                        onClick={() => handleTopicClick(subtopic, idx + 2, topic.title)}
+                        variant="ghost"
+                        justifyContent="flex-start"
+                        size="sm"
+                        py={1}
+                        height="auto"
+                        whiteSpace="normal"
+                        textAlign="left"
+                        fontSize="sm"
+                      >
+                        {subtopic}
+                      </Button>
+                    ))}
+                  </VStack>
+                </Box>
+              ))}
+            </Flex>
+          </Flex>
+          {/* 右侧人生规划长卡片 */}
+          <Box
+            bg="white"
+            borderRadius="lg"
+            border="1px"
+            borderColor="gray.200"
+            shadow="sm"
+            p={4}
+            width={isMobileView ? "100%" : "320px"}
+            minWidth={isMobileView ? "100%" : "260px"}
+            height={isMobileView ? "auto" : "424px"} // 200*2+gap
+            display="flex"
+            flexDirection="column"
+            overflow="auto"
+            ml={isMobileView ? 0 : 2}
+          >
+            <Text fontSize="lg" fontWeight="bold" mb={2}>{topics[4].title}</Text>
+            <VStack
+              align="stretch"
+              gap={1.5}
+              overflow="auto"
+              flex={1}
+              css={{
+                '&::-webkit-scrollbar': { width: '4px' },
+                '&::-webkit-scrollbar-track': { background: 'transparent' },
+                '&::-webkit-scrollbar-thumb': { background: '#CBD5E0', borderRadius: '4px' },
+              }}
+            >
+              {topics[4].subtopics.map((subtopic, subIndex) => (
+                <Button
+                  key={subIndex}
+                  onClick={() => handleTopicClick(subtopic, 4, topics[4].title)}
+                  variant="ghost"
+                  justifyContent="flex-start"
+                  size="sm"
+                  py={1}
+                  height="auto"
+                  whiteSpace="normal"
+                  textAlign="left"
+                  fontSize="sm"
+                >
+                  {subtopic}
+                </Button>
+              ))}
+            </VStack>
+          </Box>
         </Flex>
       </VStack>
     </Box>
