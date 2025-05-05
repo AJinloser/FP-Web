@@ -192,22 +192,21 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
   };
 
   return (
-    <Box 
-      height="100vh" 
-      width="100vw" 
-      display="flex" 
-      alignItems={isMobileView ? "flex-start" : "center"}
+    <Box
+      width="100vw"
+      minHeight="100vh"
+      display="flex"
+      flexDirection="column"
+      alignItems="center"
       justifyContent="center"
       bg="gray.50"
       p={isMobileView ? "4" : "6"}
-      pt={isMobileView ? "8" : "6"}
-      overflowY="auto"
     >
-      <VStack 
-        gap={isMobileView ? 4 : 6} 
-        width={isMobileView ? "100%" : "80%"} 
-        maxWidth={isMobileView ? "100%" : "800px"}
-        h="auto"
+      <VStack
+        gap={isMobileView ? 4 : 6}
+        width={isMobileView ? "100%" : "80%"}
+        maxWidth={isMobileView ? "100%" : "900px"}
+        align="center"
       >
         <Box 
           width={isMobileView ? "240px" : "360px"} 
@@ -304,7 +303,6 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
         <Flex
           width="100%"
           maxWidth="900px"
-          minHeight="440px"
           gap={4}
           justifyContent="center"
           alignItems="stretch"
@@ -315,10 +313,11 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
           <Flex
             flexDirection="column"
             gap={4}
-            flex={isMobileView ? "unset" : "0 0 480px"}
-            width={isMobileView ? "100%" : "480px"}
+            flex={isMobileView ? "unset" : 1}
+            minWidth={isMobileView ? "100%" : "480px"}
+            minHeight={0}
           >
-            <Flex gap={4}>
+            <Flex gap={4} flex={1} minHeight={0}>
               {topics.slice(0, 2).map((topic, idx) => (
                 <Box
                   key={topic.title}
@@ -329,10 +328,12 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
                   shadow="sm"
                   p={3}
                   width={isMobileView ? "100%" : "220px"}
-                  height={isMobileView ? "auto" : "200px"}
+                  minWidth={isMobileView ? "100%" : "0"}
                   display="flex"
                   flexDirection="column"
-                  overflow="hidden"
+                  flex={1}
+                  minHeight={0}
+                  height="100%"
                 >
                   <Text fontSize="lg" fontWeight="bold" mb={2}>{topic.title}</Text>
                   <VStack
@@ -340,6 +341,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
                     gap={1.5}
                     overflow="auto"
                     flex={1}
+                    minHeight={0}
                     css={{
                       '&::-webkit-scrollbar': { width: '4px' },
                       '&::-webkit-scrollbar-track': { background: 'transparent' },
@@ -366,7 +368,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
                 </Box>
               ))}
             </Flex>
-            <Flex gap={4}>
+            <Flex gap={4} flex={1} minHeight={0}>
               {topics.slice(2, 4).map((topic, idx) => (
                 <Box
                   key={topic.title}
@@ -377,10 +379,12 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
                   shadow="sm"
                   p={3}
                   width={isMobileView ? "100%" : "220px"}
-                  height={isMobileView ? "auto" : "200px"}
+                  minWidth={isMobileView ? "100%" : "0"}
                   display="flex"
                   flexDirection="column"
-                  overflow="hidden"
+                  flex={1}
+                  minHeight={0}
+                  height="100%"
                 >
                   <Text fontSize="lg" fontWeight="bold" mb={2}>{topic.title}</Text>
                   <VStack
@@ -388,6 +392,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
                     gap={1.5}
                     overflow="auto"
                     flex={1}
+                    minHeight={0}
                     css={{
                       '&::-webkit-scrollbar': { width: '4px' },
                       '&::-webkit-scrollbar-track': { background: 'transparent' },
@@ -425,10 +430,12 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
             p={4}
             width={isMobileView ? "100%" : "320px"}
             minWidth={isMobileView ? "100%" : "260px"}
-            height={isMobileView ? "auto" : "424px"} // 200*2+gap
             display="flex"
             flexDirection="column"
-            overflow="auto"
+            flex={isMobileView ? "unset" : 1}
+            minHeight={0}
+            height={isMobileView ? "auto" : "100%"}
+            maxHeight={isMobileView ? "none" : "100%"}
             ml={isMobileView ? 0 : 2}
           >
             <Text fontSize="lg" fontWeight="bold" mb={2}>{topics[4].title}</Text>
@@ -437,6 +444,7 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
               gap={1.5}
               overflow="auto"
               flex={1}
+              minHeight={0}
               css={{
                 '&::-webkit-scrollbar': { width: '4px' },
                 '&::-webkit-scrollbar-track': { background: 'transparent' },
