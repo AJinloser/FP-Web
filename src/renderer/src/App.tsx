@@ -1,6 +1,6 @@
 // import { StrictMode } from 'react';
 import {
-  Box, Flex, ChakraProvider, defaultSystem, Button,
+  Box, Flex, ChakraProvider, defaultSystem, Button, HStack,
 } from '@chakra-ui/react';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Canvas from './components/canvas/canvas';
@@ -37,6 +37,7 @@ import { isMobile } from '@/utils/device-utils';
 import { useWebSocket } from '@/context/websocket-context';
 import { FloatingWindow } from './components/FloatingWindow';
 import { SelectionProvider } from './context/selection-context';
+import { EndPage } from './components/end-page/EndPage';
 
 function App(): JSX.Element {
   const [showSidebar, setShowSidebar] = useState(true);
@@ -161,6 +162,7 @@ function AppContent({
   const [showFloating, setShowFloating] = useState(false);
   const lastAiResponseTime = useRef<number>(0);
   const specialContentRef = useRef('');
+  const [showEndPage, setShowEndPage] = useState(false);
 
   const isProcessing = aiState === 'thinking-speaking' || aiState === 'listening' || isLoading;
 
@@ -261,14 +263,39 @@ function AppContent({
     window.dispatchEvent(new CustomEvent('floating-window-close'));
   }, []);
 
+  // 添加结束聊天处理函数
+  const handleEndChat = () => {
+    wsService.disconnect(); // 断开 WebSocket 连接
+    setShowEndPage(true);
+  };
+
+  // 添加重新开始处理函数
+  const handleRestart = () => {
+    setShowEndPage(false);
+    setShowStartPage(true);
+    setTimeout(() => {
+      reconnect(); // 重新连接 WebSocket
+    }, 100);
+  };
+
   if (showStartPage) {
     return (
       <StartPage 
         onStart={(isMessageSent) => {
           shouldResetState.current = isMessageSent;
           setShowStartPage(false);
-        }} 
+        }}
+        onEnd={() => {
+          setShowStartPage(false);
+          setShowEndPage(true);
+        }}
       />
+    );
+  }
+
+  if (showEndPage) {
+    return (
+      <EndPage onRestart={handleRestart} />
     );
   }
 
@@ -288,36 +315,60 @@ function AppContent({
           <Flex {...layoutStyles.appContainer}>
             {/* 只在非移动端显示切换按钮 */}
             {!isMobileView && (
-              <Button
-                colorScheme="gray"
-                size="sm"
-                onClick={toggleMode}
-                position="fixed"
-                top={4}
-                right={4}
-                zIndex={1000}
-                transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
-                bg="white"
-                color="gray.700"
-                _hover={{
-                  transform: isProcessing ? 'none' : 'translateY(-2px)',
-                  boxShadow: isProcessing ? 'sm' : 'md',
-                  bg: isProcessing ? 'gray.100' : 'gray.50',
-                }}
-                borderRadius="xl"
-                boxShadow="sm"
-                _active={{
-                  transform: 'translateY(0)',
-                  boxShadow: 'sm',
-                  bg: 'gray.100',
-                }}
-                disabled={isProcessing}
-                opacity={isProcessing ? 0.6 : 1}
-                cursor={isProcessing ? 'not-allowed' : 'pointer'}
-                title={isProcessing ? '正在处理中，请稍候...' : ''}
-              >
-                {isChatMode ? '切换到 Live2D 模式' : '切换到聊天模式'}
-              </Button>
+              <HStack gap={2} position="fixed" top={4} right={4} zIndex={1000}>
+                <Button
+                  colorScheme="red"
+                  size="sm"
+                  onClick={handleEndChat}
+                  transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                  bg="white"
+                  color="red.500"
+                  _hover={{
+                    transform: isProcessing ? 'none' : 'translateY(-2px)',
+                    boxShadow: isProcessing ? 'sm' : 'md',
+                    bg: 'red.50',
+                  }}
+                  borderRadius="xl"
+                  boxShadow="sm"
+                  _active={{
+                    transform: 'translateY(0)',
+                    boxShadow: 'sm',
+                    bg: 'red.100',
+                  }}
+                  disabled={isProcessing}
+                  opacity={isProcessing ? 0.6 : 1}
+                  cursor={isProcessing ? 'not-allowed' : 'pointer'}
+                  title={isProcessing ? '正在处理中，请稍候...' : ''}
+                >
+                  结束聊天
+                </Button>
+                <Button
+                  colorScheme="gray"
+                  size="sm"
+                  onClick={toggleMode}
+                  transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                  bg="white"
+                  color="gray.700"
+                  _hover={{
+                    transform: isProcessing ? 'none' : 'translateY(-2px)',
+                    boxShadow: isProcessing ? 'sm' : 'md',
+                    bg: isProcessing ? 'gray.100' : 'gray.50',
+                  }}
+                  borderRadius="xl"
+                  boxShadow="sm"
+                  _active={{
+                    transform: 'translateY(0)',
+                    boxShadow: 'sm',
+                    bg: 'gray.100',
+                  }}
+                  disabled={isProcessing}
+                  opacity={isProcessing ? 0.6 : 1}
+                  cursor={isProcessing ? 'not-allowed' : 'pointer'}
+                  title={isProcessing ? '正在处理中，请稍候...' : ''}
+                >
+                  {isChatMode ? '切换到 Live2D 模式' : '切换到聊天模式'}
+                </Button>
+              </HStack>
             )}
 
             {isMobileView ? (

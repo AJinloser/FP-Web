@@ -25,33 +25,15 @@ interface TopicItem {
 }
 
 const topics: TopicItem[] = [
-  {
-    title: '养老',
-    subtopics: ['我怎么知道有没有足够资金养老？']
-  },
-  {
-    title: '通用',
-    subtopics: ['北京市提供哪些养老服务？', '怎样选择是否延迟退休？', '清华教职工能拿到哪些员工福利？']
-  },
-  {
-    title: '寿险',
-    subtopics: ['如何选择寿险？']
-  },
-  {
-    title: '健康险',
-    subtopics: ['生病了保险到底能赔多少？','我买了保险，怎么拒赔？']
-  },
-  {
-    title:'人生规划',
-    subtopics:['我希望女儿能接受更好的教育，不知道应该让她接受什么培养路线？',
-    '应该咬咬牙买房，还是继续租房等房价降下来？',
-    '我到底该不该买车呢，买什么车？',
-    '我想赚些外快，开一家辅导班或者培训班的创业合适吗？']
-  }
+  { title: '健康险', subtopics: ['如果生病了，商业保险究竟能赔多少？','社保、商保、自付的比例是多少？'] },
+  { title: '寿险', subtopics: ['如何选择寿险？'] },
+  { title: '养老', subtopics: ['怎么知道我有没有足够资金养老？'] },
+  { title: '规划', subtopics: ['我希望孩子能接受更好的教育，应该选择什么培养路线？','应该咬咬牙买房，还是继续租房等房价降下来？','我应该怎么做理财？'] }
 ];
 
 interface StartPageProps {
   onStart: (isMessageSent: boolean) => void;
+  onEnd: () => void;
 }
 
 // 添加模式类型定义
@@ -64,23 +46,19 @@ interface ApiConfig {
 }
 
 const apiConfigs: Record<string, ApiConfig> = {
-  '养老': {
+  '健康险': {
     type: 'change_api',
-    api_key: 'app-NiDDZo2vqgZJKpeRUCqVOQMB'  // 待填写
-  },
-  '通用': {
-    type: 'change_api',
-    api_key: 'YOUR_HEALTH_API_KEY'   // 待填写
+    api_key: 'app-8xJXXK0N8GG5ApHfxv6c3j5K'    // 待填写
   },
   '寿险': {
     type: 'change_api',
-    api_key: 'app-aQC3IJycLjRTna436I5IKFfB'  // 待填写
+    api_key: 'app-oDow3kYGcixiILaCfe2uSoKg'  // 待填写
   },
-  '健康险': {
+  '养老': {
     type: 'change_api',
-    api_key: 'app-weB7ztnoK8sF2xiSFvwMSgzL'    // 待填写
+    api_key: 'app-qoeZwRAPLdj4IcHULfbOX0Y3'  // 待填写
   },
-  '人生规划': {
+  '规划': {
     type: 'change_api',
     api_key: 'app-TDeTJaR7ofjZafE1CKSIFNZj'    // 待填写
   }
@@ -88,14 +66,13 @@ const apiConfigs: Record<string, ApiConfig> = {
 
 // 添加外部链接配置
 const externalLinks: Record<string, string> = {
-  '养老': 'http://skysail.top/chat/ee6y7Vf6YQrvvpYZ',
-  '通用': 'http://47.238.246.199/chat/xLwFvATCNJIHppX1',
-  '寿险': 'http://47.238.246.199/chat/dPu5OwsSpVWI7Gzd',
-  '健康险': 'http://47.238.246.199/chat/LawAvtzrWRuaDdJS',
-  '人生规划': 'http://47.238.246.199/chat/Pobg9z5L9fzPmWgN'
+  '健康险': 'http://47.238.246.199/chat/7NgG1RQS16F6yorT',
+  '寿险': 'http://47.238.246.199/chat/ENBbpwdASe61CcLu',
+  '养老': 'http://47.238.246.199/chat/Hht7OZHrigAWKgbR',
+  '规划': 'http://47.238.246.199/chat/Pobg9z5L9fzPmWgN'
 };
 
-export function StartPage({ onStart }: StartPageProps): JSX.Element {
+export function StartPage({ onStart, onEnd }: StartPageProps): JSX.Element {
   const [inputText, setInputText] = useState('');
   const { sendMessage } = useWebSocket();
   const { appendHumanMessage } = useChatHistory();
@@ -174,16 +151,16 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
       if (link) {
         console.log('Redirecting to:', link);
         window.open(link, '_blank');
+        // 书面模式下，跳转到结束页面
+        onEnd();
       }
     } else {
       // 语音模式
       // 首先发送 API 变更请求
-      if(topicTitle !== '通用'){
-        const apiConfig = apiConfigs[topicTitle];
-        if (apiConfig) {
-          console.log('Sending API change request:', apiConfig);
-          await sendMessage(apiConfig);
-        }
+      const apiConfig = apiConfigs[topicTitle];
+      if (apiConfig) {
+        console.log('Sending API change request:', apiConfig);
+        await sendMessage(apiConfig);
       }
       
       // 然后发送问题
@@ -198,9 +175,9 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
       display="flex"
       flexDirection="column"
       alignItems="center"
-      justifyContent="center"
       bg="gray.50"
       p={isMobileView ? "4" : "6"}
+      style={{ overflowY: 'auto', height: '100vh' }}
     >
       <VStack
         gap={isMobileView ? 4 : 6}
@@ -306,169 +283,78 @@ export function StartPage({ onStart }: StartPageProps): JSX.Element {
           gap={4}
           justifyContent="center"
           alignItems="stretch"
-          mt={2}
           direction={isMobileView ? "column" : "row"}
         >
-          {/* 左侧四宫格 */}
-          <Flex
-            flexDirection="column"
-            gap={4}
-            flex={isMobileView ? "unset" : 1}
-            minWidth={isMobileView ? "100%" : "480px"}
-            minHeight={0}
-          >
-            <Flex gap={4} flex={1} minHeight={0}>
-              {topics.slice(0, 2).map((topic, idx) => (
-                <Box
-                  key={topic.title}
-                  bg="white"
-                  borderRadius="lg"
-                  border="1px"
-                  borderColor="gray.200"
-                  shadow="sm"
-                  p={3}
-                  width={isMobileView ? "100%" : "220px"}
-                  minWidth={isMobileView ? "100%" : "0"}
-                  display="flex"
-                  flexDirection="column"
-                  flex={1}
-                  minHeight={0}
-                  height="100%"
-                >
-                  <Text fontSize="lg" fontWeight="bold" mb={2}>{topic.title}</Text>
-                  <VStack
-                    align="stretch"
-                    gap={1.5}
-                    overflow="auto"
-                    flex={1}
-                    minHeight={0}
-                    css={{
-                      '&::-webkit-scrollbar': { width: '4px' },
-                      '&::-webkit-scrollbar-track': { background: 'transparent' },
-                      '&::-webkit-scrollbar-thumb': { background: '#CBD5E0', borderRadius: '4px' },
-                    }}
-                  >
-                    {topic.subtopics.map((subtopic, subIndex) => (
-                      <Button
-                        key={subIndex}
-                        onClick={() => handleTopicClick(subtopic, idx, topic.title)}
-                        variant="ghost"
-                        justifyContent="flex-start"
-                        size="sm"
-                        py={1}
-                        height="auto"
-                        whiteSpace="normal"
-                        textAlign="left"
-                        fontSize="sm"
-                      >
-                        {subtopic}
-                      </Button>
-                    ))}
-                  </VStack>
-                </Box>
-              ))}
-            </Flex>
-            <Flex gap={4} flex={1} minHeight={0}>
-              {topics.slice(2, 4).map((topic, idx) => (
-                <Box
-                  key={topic.title}
-                  bg="white"
-                  borderRadius="lg"
-                  border="1px"
-                  borderColor="gray.200"
-                  shadow="sm"
-                  p={3}
-                  width={isMobileView ? "100%" : "220px"}
-                  minWidth={isMobileView ? "100%" : "0"}
-                  display="flex"
-                  flexDirection="column"
-                  flex={1}
-                  minHeight={0}
-                  height="100%"
-                >
-                  <Text fontSize="lg" fontWeight="bold" mb={2}>{topic.title}</Text>
-                  <VStack
-                    align="stretch"
-                    gap={1.5}
-                    overflow="auto"
-                    flex={1}
-                    minHeight={0}
-                    css={{
-                      '&::-webkit-scrollbar': { width: '4px' },
-                      '&::-webkit-scrollbar-track': { background: 'transparent' },
-                      '&::-webkit-scrollbar-thumb': { background: '#CBD5E0', borderRadius: '4px' },
-                    }}
-                  >
-                    {topic.subtopics.map((subtopic, subIndex) => (
-                      <Button
-                        key={subIndex}
-                        onClick={() => handleTopicClick(subtopic, idx + 2, topic.title)}
-                        variant="ghost"
-                        justifyContent="flex-start"
-                        size="sm"
-                        py={1}
-                        height="auto"
-                        whiteSpace="normal"
-                        textAlign="left"
-                        fontSize="sm"
-                      >
-                        {subtopic}
-                      </Button>
-                    ))}
-                  </VStack>
-                </Box>
-              ))}
-            </Flex>
-          </Flex>
-          {/* 右侧人生规划长卡片 */}
-          <Box
-            bg="white"
-            borderRadius="lg"
-            border="1px"
-            borderColor="gray.200"
-            shadow="sm"
-            p={4}
-            width={isMobileView ? "100%" : "320px"}
-            minWidth={isMobileView ? "100%" : "260px"}
-            display="flex"
-            flexDirection="column"
-            flex={isMobileView ? "unset" : 1}
-            minHeight={0}
-            height={isMobileView ? "auto" : "100%"}
-            maxHeight={isMobileView ? "none" : "100%"}
-            ml={isMobileView ? 0 : 2}
-          >
-            <Text fontSize="lg" fontWeight="bold" mb={2}>{topics[4].title}</Text>
-            <VStack
-              align="stretch"
-              gap={1.5}
-              overflow="auto"
+          {topics.map((topic, idx) => (
+            <Box
+              key={topic.title}
+              bg="white"
+              borderRadius="lg"
+              border="1px"
+              borderColor="gray.200"
+              shadow="sm"
+              p={4}
+              width={isMobileView ? "100%" : "220px"}
+              minWidth={isMobileView ? "100%" : "0"}
+              display="flex"
+              flexDirection="column"
               flex={1}
               minHeight={0}
-              css={{
-                '&::-webkit-scrollbar': { width: '4px' },
-                '&::-webkit-scrollbar-track': { background: 'transparent' },
-                '&::-webkit-scrollbar-thumb': { background: '#CBD5E0', borderRadius: '4px' },
-              }}
+              height={isMobileView ? "auto" : "260px"}
+              boxSizing="border-box"
             >
-              {topics[4].subtopics.map((subtopic, subIndex) => (
-                <Button
-                  key={subIndex}
-                  onClick={() => handleTopicClick(subtopic, 4, topics[4].title)}
-                  variant="ghost"
-                  justifyContent="flex-start"
-                  size="sm"
-                  py={1}
-                  height="auto"
-                  whiteSpace="normal"
-                  textAlign="left"
-                  fontSize="sm"
-                >
-                  {subtopic}
-                </Button>
-              ))}
-            </VStack>
-          </Box>
+              <Button
+                variant="ghost"
+                width="100%"
+                justifyContent="flex-start"
+                fontSize="lg"
+                fontWeight="bold"
+                mb={2}
+                cursor="pointer"
+                _hover={{ bg: 'blue.50' }}
+                _active={{ bg: 'blue.100' }}
+                onClick={async () => {
+                  const apiConfig = apiConfigs[topic.title];
+                  if (apiConfig) {
+                    console.log('Sending API change request from title:', apiConfig);
+                    await sendMessage(apiConfig);
+                    window.alert(`已成功切换到${topic.title}模块！`);
+                  }
+                }}
+              >
+                {topic.title}
+              </Button>
+              <VStack
+                align="stretch"
+                gap={1.5}
+                overflow="auto"
+                flex={1}
+                minHeight={0}
+                css={{
+                  '&::-webkit-scrollbar': { width: '4px' },
+                  '&::-webkit-scrollbar-track': { background: 'transparent' },
+                  '&::-webkit-scrollbar-thumb': { background: '#CBD5E0', borderRadius: '4px' },
+                }}
+              >
+                {topic.subtopics.map((subtopic, subIndex) => (
+                  <Button
+                    key={subIndex}
+                    onClick={() => handleTopicClick(subtopic, idx, topic.title)}
+                    variant="ghost"
+                    justifyContent="flex-start"
+                    size="sm"
+                    py={1}
+                    height="auto"
+                    whiteSpace="normal"
+                    textAlign="left"
+                    fontSize="sm"
+                  >
+                    {subtopic}
+                  </Button>
+                ))}
+              </VStack>
+            </Box>
+          ))}
         </Flex>
       </VStack>
     </Box>
