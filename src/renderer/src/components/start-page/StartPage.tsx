@@ -193,8 +193,8 @@ export function StartPage({ onStart, onEnd }: StartPageProps): JSX.Element {
     >
       <VStack
         gap={isMobileView ? 4 : 6}
-        width={isMobileView ? "100%" : "80%"}
-        maxWidth={isMobileView ? "100%" : "900px"}
+        width="100%"
+        maxWidth="900px"
         align="center"
       >
         <Box 
@@ -212,7 +212,12 @@ export function StartPage({ onStart, onEnd }: StartPageProps): JSX.Element {
           />
         </Box>
         
-        <Box position="relative" width="100%" maxWidth="600px" mb={showVoiceIndicator && micOn ? "120px" : 0}>
+        <Box
+          position="relative"
+          width="100%"
+          maxWidth="900px"
+          mb={showVoiceIndicator && micOn ? "120px" : 0}
+        >
           <HStack width="100%">
             <Input
               flex={1}
@@ -257,7 +262,7 @@ export function StartPage({ onStart, onEnd }: StartPageProps): JSX.Element {
           <VoiceIndicator show={showVoiceIndicator && micOn} position="bottom" />
         </Box>
 
-        <Box width="100%" maxWidth="600px" bg="white" p={4} borderRadius="lg" shadow="sm">
+        <Box width="100%" maxWidth="900px" bg="white" p={4} borderRadius="lg" shadow="sm">
           <HStack justify="space-between" align="center" mb={2}>
             <Switch.Root
               id="mode-switch"
