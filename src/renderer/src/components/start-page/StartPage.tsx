@@ -25,10 +25,10 @@ interface TopicItem {
 }
 
 const topics: TopicItem[] = [
-  { title: '健康险', subtopics: ['如果生病了，商业保险究竟能赔多少？','社保、商保、自付的比例是多少？'] },
-  { title: '寿险', subtopics: ['如何选择寿险？'] },
-  { title: '养老', subtopics: ['怎么知道我有没有足够资金养老？'] },
-  { title: '规划', subtopics: ['我希望孩子能接受更好的教育，应该选择什么培养路线？','应该咬咬牙买房，还是继续租房等房价降下来？','我应该怎么做理财？'] }
+  { title: '健康险', subtopics: ['如何选择健康保险？','清华大学教职工有哪些医保福利？','如果生病了，社保、商保、自付的比例是多少？'] },
+  { title: '寿险', subtopics: ['如何选择寿险？','买分红型寿险，收益真的比存银行高吗？','健康告知里问的“既往病史”，连感冒发烧都要说吗？'] },
+  { title: '养老', subtopics: ['怎么知道我有没有足够资金养老？','如果我打算55岁退休，会不会出现资金缺口？','我需要准备多少钱才能退休以后过上好生活'] },
+  { title: '规划', subtopics: ['我希望孩子能接受更好的教育，应该选择什么培养路线？','应该咬咬牙买房，还是继续租房等房价降下来？','我应该怎么做理财？应该买黄金、股票吗？'] }
 ];
 
 interface StartPageProps {
@@ -48,7 +48,7 @@ interface ApiConfig {
 const apiConfigs: Record<string, ApiConfig> = {
   '健康险': {
     type: 'change_api',
-    api_key: 'app-8xJXXK0N8GG5ApHfxv6c3j5K'    // 待填写
+    api_key: 'app-WFLm27inZKkThrBca4MFMRTZ'    // 待填写
   },
   '寿险': {
     type: 'change_api',
@@ -60,7 +60,7 @@ const apiConfigs: Record<string, ApiConfig> = {
   },
   '规划': {
     type: 'change_api',
-    api_key: 'app-TDeTJaR7ofjZafE1CKSIFNZj'    // 待填写
+    api_key: 'app-CS1z0r2zcX28YSY4HuyU5c3Z'    // 待填写
   }
 };
 
@@ -317,7 +317,7 @@ export function StartPage({ onStart, onEnd }: StartPageProps): JSX.Element {
               flexDirection="column"
               flex={1}
               minHeight={0}
-              height={isMobileView ? "auto" : "260px"}
+              height={isMobileView ? "auto" : "280px"}
               boxSizing="border-box"
             >
               <Button
