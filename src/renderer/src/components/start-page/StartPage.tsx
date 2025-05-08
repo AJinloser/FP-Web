@@ -56,7 +56,7 @@ const apiConfigs: Record<string, ApiConfig> = {
   },
   '养老': {
     type: 'change_api',
-    api_key: 'app-qoeZwRAPLdj4IcHULfbOX0Y3'  // 待填写
+    api_key: 'app-1U6qv0OJCiYli8sDnkCFU3Jn'  // 待填写
   },
   '规划': {
     type: 'change_api',
