@@ -84,6 +84,7 @@ export function StartPage({ onStart, onEnd }: StartPageProps): JSX.Element {
   const [showVoiceIndicator, setShowVoiceIndicator] = useState(false);
   const { options, setCurrentSelection } = useSelection();
   const [mode, setMode] = useState<Mode>('voice');
+  const [currentTopic, setCurrentTopic] = useState<string>('健康险');
 
   useEffect(() => {
     const handleResize = () => {
@@ -115,17 +116,28 @@ export function StartPage({ onStart, onEnd }: StartPageProps): JSX.Element {
   const handleSend = (text: string, index: number) => {
     if (!text.trim()) return;
     
-    setCurrentSelection(options[index]);
-    isMessageSent.current = true;
-    setAiState('thinking-speaking');
-    appendHumanMessage(text.trim());
-    sendMessage({
-      type: 'text-input',
-      text: text.trim(),
-      selection: options[index]
-    });
-    
-    onStart(isMessageSent.current);
+    if (mode === 'written') {
+      // 书面模式下，跳转到对应链接
+      const link = externalLinks[currentTopic];
+      if (link) {
+        console.log('Redirecting to:', link);
+        window.open(link, '_blank');
+        onEnd();
+      }
+    } else {
+      // 语音模式下的原有逻辑
+      setCurrentSelection(options[index]);
+      isMessageSent.current = true;
+      setAiState('thinking-speaking');
+      appendHumanMessage(text.trim());
+      sendMessage({
+        type: 'text-input',
+        text: text.trim(),
+        selection: options[index]
+      });
+      
+      onStart(isMessageSent.current);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -318,6 +330,7 @@ export function StartPage({ onStart, onEnd }: StartPageProps): JSX.Element {
                   if (apiConfig) {
                     console.log('Sending API change request from title:', apiConfig);
                     await sendMessage(apiConfig);
+                    setCurrentTopic(topic.title);
                     window.alert(`已成功切换到${topic.title}模块！`);
                   }
                 }}

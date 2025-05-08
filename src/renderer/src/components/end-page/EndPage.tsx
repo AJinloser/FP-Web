@@ -16,7 +16,7 @@ interface EndPageProps {
 export function EndPage({ onRestart }: EndPageProps): JSX.Element {
   const { baseUrl } = useWebSocket();
   const [isMobileView, setIsMobileView] = React.useState(isMobile());
-  const surveyUrl = "https://your-survey-url.com"; // 替换为实际的问卷地址
+  const surveyUrl = "https://www.wjx.cn/vm/e6f8bIk.aspx"; // 替换为实际的问卷地址
 
   React.useEffect(() => {
     const handleResize = () => {
