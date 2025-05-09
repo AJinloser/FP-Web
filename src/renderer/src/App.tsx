@@ -372,7 +372,7 @@ function AppContent({
             )}
 
             {isMobileView ? (
-              <Flex direction="column" h="100vh" overflow="hidden">
+              <Flex direction="column" h="100vh" minH="0" overflow="hidden">
                 {/* 移动端右上角的结束聊天按钮 */}
                 <Button
                   colorScheme="red"
@@ -409,9 +409,9 @@ function AppContent({
                   animate={controls}
                   initial={{ height: "40vh" }}
                   transition={{ type: "spring", damping: 20 }}
-                  style={{ overflow: 'hidden' }}
+                  style={{ overflow: 'hidden', flex: 'none' }}
                 >
-                  <Box height="40vh">
+                  <Box height="100%">
                     <Canvas />
                   </Box>
                 </motion.div>
@@ -423,34 +423,24 @@ function AppContent({
                   dragConstraints={{ top: 0, bottom: 0 }}
                   dragElastic={0.2}
                   onDragEnd={handleDragEnd}
-                  style={{ 
+                  style={{
                     flex: 1,
+                    minHeight: 0,
                     overflow: 'hidden',
                     touchAction: 'pan-y'
                   }}
                 >
-                  <Box 
+                  <Box
                     {...layoutStyles.mobileLayout.chatPanel}
-                    height={showLive2D ? "calc(60vh - 56px)" : "calc(100vh - 56px)"}
+                    height="100%"
                     transition="height 0.3s ease"
                   >
                     {/* 顶部按钮和提示区域 */}
-                    <Box 
+                    <Box
+                      flex="none"
                       {...layoutStyles.mobileLayout.headerButtons}
-                      position="relative"
                     >
-                      <Box
-                        position="absolute"
-                        top="2"
-                        left="50%"
-                        transform="translateX(-50%)"
-                        width="32px"
-                        height="4px"
-                        borderRadius="full"
-                        bg="gray.300"
-                        opacity={0.8}
-                      />
-                      <HeaderButtons 
+                      <HeaderButtons
                         onSettingsOpen={onSettingsOpen}
                         onNewHistory={createNewHistory}
                         onReturnHome={handleReturnHome}
@@ -461,7 +451,7 @@ function AppContent({
                 </motion.div>
 
                 {/* Footer 部分 */}
-                <Box {...layoutStyles.mobileLayout.footer}>
+                <Box flex="none" {...layoutStyles.mobileLayout.footer}>
                   <Footer
                     isCollapsed={false}
                     onToggle={() => {}}
