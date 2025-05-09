@@ -373,6 +373,37 @@ function AppContent({
 
             {isMobileView ? (
               <Flex direction="column" h="100vh" overflow="hidden">
+                {/* 移动端右上角的结束聊天按钮 */}
+                <Button
+                  colorScheme="red"
+                  size="sm"
+                  onClick={handleEndChat}
+                  transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+                  bg="white"
+                  color="red.500"
+                  _hover={{
+                    transform: isProcessing ? 'none' : 'translateY(-2px)',
+                    boxShadow: isProcessing ? 'sm' : 'md',
+                    bg: 'red.50',
+                  }}
+                  borderRadius="xl"
+                  boxShadow="sm"
+                  _active={{
+                    transform: 'translateY(0)',
+                    boxShadow: 'sm',
+                    bg: 'red.100',
+                  }}
+                  disabled={isProcessing}
+                  opacity={isProcessing ? 0.6 : 1}
+                  cursor={isProcessing ? 'not-allowed' : 'pointer'}
+                  title={isProcessing ? '正在处理中，请稍候...' : ''}
+                  position="fixed"
+                  top={4}
+                  right={4}
+                  zIndex={1000}
+                >
+                  结束聊天
+                </Button>
                 {/* Live2D 部分，使用 motion.div 实现动画 */}
                 <motion.div
                   animate={controls}
